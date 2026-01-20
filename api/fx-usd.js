@@ -4,9 +4,14 @@ export default async function handler(req, res) {
   res.setHeader('Cache-Control', 's-maxage=3600, stale-while-revalidate');
 
   try {
+    // Token desde env var (seguro)
+    const token = process.env.BANXICO_TOKEN;
+    
+    if (!token) {
+      throw new Error('BANXICO_TOKEN no configurado');
+    }
+    
     // Banxico API - Serie SF43718 (Fix USD)
-    // Token correcto de Banxico
-    const token = '40418d20484c683fc7d603806b8bed5433e43ddba807b451b83cb2c09776c650';
     const url = 'https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718/datos/oportuno';
     
     const response = await fetch(url, {
