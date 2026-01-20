@@ -5,7 +5,8 @@ export default async function handler(req, res) {
 
   try {
     // Banxico API - Serie SF43718 (Fix USD)
-    const token = 'e44b6d7440a5de5d3c98c0b26a5b1f3ba2df848ad87c5fcd8aa5b0785e8ef82f';
+    // Token correcto de Banxico
+    const token = '40418d20484c683fc7d603806b8bed5433e43ddba807b451b83cb2c09776c650';
     const url = 'https://www.banxico.org.mx/SieAPIRest/service/v1/series/SF43718/datos/oportuno';
     
     const response = await fetch(url, {
@@ -16,7 +17,7 @@ export default async function handler(req, res) {
     });
     
     if (!response.ok) {
-      throw new Error('Banxico API error');
+      throw new Error('Banxico API error: ' + response.status);
     }
     
     const data = await response.json();
