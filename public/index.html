@@ -179,7 +179,7 @@
             </div>
             
             <div class="credit-counter" id="creditCounter">⚡ 10 cálculos restantes</div>
-            <button class="btn-comprar" id="btnComprar" style="display:none;">💳 Comprar 10 cálculos — $10 MXN</button>
+            <button class="btn-comprar" id="btnComprar">💳 Comprar 10 cálculos — $10 MXN</button>
             <button class="btn-pdf" id="btnDescargarPDF">📄 <span id="btnPdfText">Descargar PDF de cálculo desglosado</span></button>
             <button class="btn-desglose" id="btnDesglose"><span id="btnDesgloseText">▼ Ver desglose completo</span></button>
             <div class="nota-pv" id="notaPV"><div class="nota-pv-header" id="notaPVToggle"><span>⚠️</span><span class="nota-pv-titulo" id="notaPVTitulo">Aviso: Puerto Vallarta 2026</span><span class="nota-pv-arrow">▼</span></div><div class="nota-pv-body"><p id="notaPVTexto">La Ley de Ingresos de Puerto Vallarta 2026 contempla un impuesto de saneamiento ambiental (~$90 MXN/noche) que podría aplicar a rentas vacacionales.</p><p class="disclaimer" id="notaPVDisclaimer"><strong>Pendiente de confirmación.</strong> Este impuesto aún no se incluye en el cálculo.</p><span class="nota-pv-link" id="notaPVLink">Más información →</span></div></div>
@@ -211,27 +211,7 @@
         function setCredits(n){localStorage.setItem('anfitrion_calculos',n);updateCreditDisplay();}
         function useCredit(){const c=getCredits();if(c>0){setCredits(c-1);return true;}return false;}
         function addCredits(n){setCredits(getCredits()+n);}
-        function updateCreditDisplay(){
-            const c=getCredits(),t=TEXTS[currentLang],el=document.getElementById('creditCounter');
-            if(!el)return;
-            if(c<=0){el.textContent=t.creditNone;el.style.background='#dc2626';}
-            else{
-                el.textContent='⚡ '+c+t.creditRemaining;
-                // Gradiente verde (10) → rojo (1)
-                if(c>=10)el.style.background='#10b981';
-                else if(c===9)el.style.background='#22c55e';
-                else if(c===8)el.style.background='#84cc16';
-                else if(c===7)el.style.background='#a3e635';
-                else if(c===6)el.style.background='#facc15';
-                else if(c===5)el.style.background='#fbbf24';
-                else if(c===4)el.style.background='#f97316';
-                else if(c===3)el.style.background='#fb923c';
-                else if(c===2)el.style.background='#f87171';
-                else el.style.background='#ef4444';
-            }
-        }
-        function updateLanguage(){const t=TEXTS[currentLang];document.getElementById('appTitle').textContent=t.appTitle;document.getElementById('subtitle').textContent=t.subtitle;document.getElementById('cardTitleReserva').textContent=t.cardTitleReserva;document.getElementById('labelPlataforma').textContent=t.labelPlataforma;document.getElementById('labelTarifa').textContent=t.labelTarifa;document.getElementById('labelNoches').textContent=t.labelNoches;document.getElementById('cardTitleFiscal').textContent=t.cardTitleFiscal;document.getElementById('labelRegimen').textContent=t.labelRegimen;document.getElementById('labelEstado').textContent=t.labelEstado;document.getElementById('cardTitleGastos').textContent=t.cardTitleGastos;document.getElementById('labelLimpiezaCobrada').textContent=t.labelLimpiezaCobrada;document.getElementById('labelLimpiezaReal').textContent=t.labelLimpiezaReal;document.getElementById('labelConsumibles').textContent=t.labelConsumibles;document.getElementById('btnCalcularText').textContent=t.btnCalcular;document.getElementById('labelGananciaNeta').textContent=t.labelGananciaNeta;document.getElementById('btnPdfText').textContent=t.btnPdf;document.getElementById('btnDesgloseText').textContent=desgloseExpanded?t.btnDesgloseHide:t.btnDesglose;document.getElementById('labelIngresoBruto').textContent=t.labelIngresoBruto;document.getElementById('labelTotalDeducciones').innerHTML='<strong>'+t.labelTotalDeducciones+'</strong>';document.getElementById('labelRetencionISR').textContent=t.labelRetencionISR;document.getElementById('labelRetencionIVA').textContent=t.labelRetencionIVA;document.getElementById('labelIVAAdicional').textContent=t.labelIVAAdicional;document.getElementById('labelGastoLimpieza').textContent=t.labelGastoLimpieza;document.getElementById('labelGastoConsumibles').textContent=t.labelGastoConsumibles;document.getElementById('disclaimer').innerHTML=t.disclaimer;document.getElementById('notaPVTitulo').textContent=t.notaPVTitulo;document.getElementById('notaPVTexto').textContent=t.notaPVTexto;document.getElementById('notaPVDisclaimer').innerHTML=t.notaPVDisclaimer;updateExchangeRateDisplay();updateCreditDisplay();}
-        async function fetchTipoCambio(){const cached=localStorage.getItem('tipoCambio'),cachedTime=localStorage.getItem('tipoCambioTime');if(cached&&cachedTime&&(Date.now()-parseInt(cachedTime))<3600000){tipoCambio=parseFloat(cached);updateExchangeRateDisplay();return;}try{const r=await fetch('/api/fx-usd');const d=await r.json();if(d.tipoCambio){tipoCambio=d.tipoCambio;localStorage.setItem('tipoCambio',tipoCambio.toString());localStorage.setItem('tipoCambioTime',Date.now().toString());}}catch(e){}updateExchangeRateDisplay();}
+        function updateCreditDisplay(){            const c=getCredits(),t=TEXTS[currentLang],el=document.getElementById('creditCounter'),btnComprar=document.getElementById('btnComprar'),btnCalc=document.getElementById('btnCalcular'),btnCalcText=document.getElementById('btnCalcularText');            if(!el)return;            if(c<=0){                el.textContent=t.creditNone;                el.style.background='#dc2626';                if(btnComprar){btnComprar.style.opacity='1';btnComprar.style.transform='scale(1.02)';btnComprar.textContent=t.btnComprar;}                if(btnCalcText)btnCalcText.textContent=t.btnSinCalculos;                if(btnCalc)btnCalc.disabled=true;            }else{                el.textContent='⚡ '+c+t.creditRemaining;                if(btnComprar){btnComprar.style.opacity='0.7';btnComprar.style.transform='scale(1)';btnComprar.textContent=t.btnComprar;}                if(btnCalcText)btnCalcText.textContent=t.btnCalcular;                if(btnCalc)btnCalc.disabled=false;                if(c>=10)el.style.background='#10b981';                else if(c===9)el.style.background='#22c55e';                else if(c===8)el.style.background='#84cc16';                else if(c===7)el.style.background='#a3e635';                else if(c===6)el.style.background='#facc15';                else if(c===5)el.style.background='#fbbf24';                else if(c===4)el.style.background='#f97316';                else if(c===3)el.style.background='#fb923c';                else if(c===2)el.style.background='#f87171';                else el.style.background='#ef4444';            }        }catch(e){}updateExchangeRateDisplay();}
         function updateExchangeRateDisplay(){document.getElementById('exchangeRate').textContent=TEXTS[currentLang].exchangeRate.replace('{{rate}}',tipoCambio.toFixed(2));}
         function convertir(m,de,a){if(de===a)return m;if(de==='USD'&&a==='MXN')return m*tipoCambio;if(de==='MXN'&&a==='USD')return m/tipoCambio;return m;}
         function formatMoney(a,c){return new Intl.NumberFormat(currentLang==='es'?'es-MX':'en-US',{style:'currency',currency:c||'MXN',minimumFractionDigits:0,maximumFractionDigits:2}).format(a);}
