@@ -1,0 +1,975 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anfitrion MX - Calculadora Fiscal para Hosts</title>
+    <meta name="description" content="Calcula tu ganancia neta real en Airbnb, Vrbo y Booking. Incluye ISR, IVA, ISH por estado y comisiones.">
+    <meta name="theme-color" content="#FF5A5F">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="icon" type="image/png" href="/icon-192.png">
+    <link rel="apple-touch-icon" href="/icon-192.png">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            --airbnb: #FF5A5F;
+            --airbnb-dark: #E04E52;
+            --vrbo: #3662D8;
+            --booking: #003580;
+            --success: #00A699;
+            --warning: #FFB400;
+            --danger: #FF5A5F;
+            --gray-50: #F7F7F7;
+            --gray-100: #EBEBEB;
+            --gray-200: #DDDDDD;
+            --gray-500: #717171;
+            --gray-700: #484848;
+            --gray-900: #222222;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: var(--gray-50);
+            color: var(--gray-900);
+            line-height: 1.5;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+        
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 24px 0;
+            margin-bottom: 16px;
+        }
+        
+        .header h1 {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--airbnb);
+            margin-bottom: 4px;
+        }
+        
+        .header p {
+            color: var(--gray-500);
+            font-size: 14px;
+        }
+        
+        /* Currency Toggle */
+        .currency-toggle {
+            display: flex;
+            background: var(--gray-100);
+            border-radius: 12px;
+            padding: 4px;
+            margin-bottom: 16px;
+        }
+        
+        .currency-btn {
+            flex: 1;
+            padding: 12px;
+            border: none;
+            background: transparent;
+            border-radius: 10px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--gray-500);
+        }
+        
+        .currency-btn.active {
+            background: white;
+            color: var(--gray-900);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .exchange-rate {
+            text-align: center;
+            font-size: 12px;
+            color: var(--gray-500);
+            margin-bottom: 16px;
+        }
+        
+        /* Card */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+            box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+        }
+        
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--gray-700);
+            margin-bottom: 6px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 16px;
+            transition: border-color 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: var(--airbnb);
+        }
+        
+        .form-select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--gray-200);
+            border-radius: 12px;
+            font-size: 16px;
+            background: white;
+            cursor: pointer;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        
+        /* Platform Selector */
+        .platform-selector {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-bottom: 16px;
+        }
+        
+        .platform-btn {
+            padding: 12px 8px;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            background: white;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+        }
+        
+        .platform-btn.active {
+            border-color: var(--airbnb);
+            background: #FFF5F5;
+        }
+        
+        .platform-btn[data-platform="vrbo"].active {
+            border-color: var(--vrbo);
+            background: #F0F4FF;
+        }
+        
+        .platform-btn[data-platform="booking"].active {
+            border-color: var(--booking);
+            background: #F0F4FF;
+        }
+        
+        .platform-btn[data-platform="directa"].active {
+            border-color: var(--success);
+            background: #F0FFF9;
+        }
+        
+        .platform-fee {
+            font-size: 10px;
+            color: var(--gray-500);
+            font-weight: 400;
+            display: block;
+            margin-top: 2px;
+        }
+        
+        /* Calculate Button */
+        .btn-calculate {
+            width: 100%;
+            padding: 16px;
+            background: var(--airbnb);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .btn-calculate:hover {
+            background: var(--airbnb-dark);
+        }
+        
+        .btn-calculate:disabled {
+            background: var(--gray-200);
+            cursor: not-allowed;
+        }
+        
+        /* Results */
+        .results {
+            display: none;
+        }
+        
+        .results.show {
+            display: block;
+        }
+        
+        .result-hero {
+            background: linear-gradient(135deg, var(--success) 0%, #00857A 100%);
+            border-radius: 16px;
+            padding: 24px;
+            text-align: center;
+            color: white;
+            margin-bottom: 16px;
+        }
+        
+        .result-hero-label {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 4px;
+        }
+        
+        .result-hero-amount {
+            font-size: 36px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+        
+        .result-hero-secondary {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+        
+        .result-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--gray-100);
+        }
+        
+        .result-row:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            font-size: 14px;
+            color: var(--gray-700);
+        }
+        
+        .result-value {
+            font-size: 14px;
+            font-weight: 600;
+            text-align: right;
+        }
+        
+        .result-value.negative {
+            color: var(--danger);
+        }
+        
+        .result-value.positive {
+            color: var(--success);
+        }
+        
+        .result-secondary {
+            font-size: 12px;
+            color: var(--gray-500);
+            font-weight: 400;
+        }
+        
+        /* Collapsible */
+        .collapsible-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            padding: 12px 0;
+        }
+        
+        .collapsible-header h3 {
+            font-size: 14px;
+            font-weight: 600;
+        }
+        
+        .collapsible-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--gray-100);
+            border-radius: 50%;
+            transition: transform 0.2s;
+        }
+        
+        .collapsible-content {
+            display: none;
+        }
+        
+        .collapsible.open .collapsible-content {
+            display: block;
+        }
+        
+        .collapsible.open .collapsible-icon {
+            transform: rotate(180deg);
+        }
+        
+        /* Footer */
+        .footer {
+            text-align: center;
+            padding: 24px 0;
+            color: var(--gray-500);
+            font-size: 12px;
+        }
+        
+        .footer a {
+            color: var(--airbnb);
+            text-decoration: none;
+        }
+        
+        /* Install Banner */
+        .install-banner {
+            display: none;
+            background: linear-gradient(135deg, var(--airbnb) 0%, var(--airbnb-dark) 100%);
+            color: white;
+            padding: 16px;
+            border-radius: 12px;
+            margin-bottom: 16px;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .install-banner.show {
+            display: flex;
+        }
+        
+        .install-banner p {
+            font-size: 14px;
+            font-weight: 500;
+        }
+        
+        .install-btn {
+            padding: 8px 16px;
+            background: white;
+            color: var(--airbnb);
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        /* Info tooltip */
+        .info-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 16px;
+            height: 16px;
+            background: var(--gray-200);
+            border-radius: 50%;
+            font-size: 10px;
+            cursor: help;
+            margin-left: 4px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 360px) {
+            .platform-selector {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .result-hero-amount {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <h1>🏠 Anfitrion MX</h1>
+            <p>Calculadora fiscal para hosts</p>
+        </header>
+        
+        <!-- Install Banner -->
+        <div class="install-banner" id="installBanner">
+            <p>📲 Instala la app</p>
+            <button class="install-btn" id="installBtn">Instalar</button>
+        </div>
+        
+        <!-- Currency Toggle -->
+        <div class="currency-toggle">
+            <button class="currency-btn active" data-currency="MXN">🇲🇽 Pesos MXN</button>
+            <button class="currency-btn" data-currency="USD">🇺🇸 Dólares USD</button>
+        </div>
+        <div class="exchange-rate" id="exchangeRate">Cargando tipo de cambio...</div>
+        
+        <!-- Form -->
+        <div class="card">
+            <h2 class="card-title">📋 Datos de la reserva</h2>
+            
+            <!-- Platform -->
+            <div class="form-group">
+                <label class="form-label">Plataforma</label>
+                <div class="platform-selector">
+                    <button class="platform-btn active" data-platform="airbnb">
+                        Airbnb
+                        <span class="platform-fee">3%</span>
+                    </button>
+                    <button class="platform-btn" data-platform="vrbo">
+                        Vrbo
+                        <span class="platform-fee">8%</span>
+                    </button>
+                    <button class="platform-btn" data-platform="booking">
+                        Booking
+                        <span class="platform-fee">15%</span>
+                    </button>
+                    <button class="platform-btn" data-platform="directa">
+                        Directa
+                        <span class="platform-fee">0%</span>
+                    </button>
+                </div>
+            </div>
+            
+            <!-- Tarifa y Noches -->
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Tarifa por noche</label>
+                    <input type="number" class="form-input" id="tarifaNoche" placeholder="2,000" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Número de noches</label>
+                    <input type="number" class="form-input" id="numNoches" placeholder="3" min="1" value="1">
+                </div>
+            </div>
+            
+            <!-- Limpieza -->
+            <div class="form-group">
+                <label class="form-label">Tarifa de limpieza (opcional)</label>
+                <input type="number" class="form-input" id="tarifaLimpieza" placeholder="500" min="0">
+            </div>
+        </div>
+        
+        <!-- Fiscal Info -->
+        <div class="card">
+            <h2 class="card-title">💼 Régimen fiscal</h2>
+            
+            <div class="form-group">
+                <label class="form-label">Tu régimen fiscal</label>
+                <select class="form-select" id="regimenFiscal">
+                    <option value="SIN_RFC">Sin RFC (retención máxima)</option>
+                    <option value="RESICO">RESICO</option>
+                    <option value="ACT_EMPRESARIAL">Actividad Empresarial</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Estado donde está tu propiedad</label>
+                <select class="form-select" id="estado">
+                    <option value="JALISCO">Jalisco (3% ISH - convenio Airbnb)</option>
+                    <option value="CDMX">CDMX (5% ISH - convenio Airbnb)</option>
+                    <option value="QROO">Quintana Roo (4% ISH - convenio Airbnb)</option>
+                    <option value="YUCATAN">Yucatán (5% ISH - convenio Airbnb)</option>
+                    <option value="BCS">Baja California Sur (5% ISH - convenio Airbnb)</option>
+                    <option value="EDOMEX">Estado de México (3% ISH - convenio Airbnb)</option>
+                    <option value="OAXACA">Oaxaca (3% ISH - convenio Airbnb)</option>
+                    <option value="SINALOA">Sinaloa (3% ISH - convenio Airbnb)</option>
+                    <option value="SONORA">Sonora (2% ISH - convenio Airbnb)</option>
+                    <option value="CHIAPAS">Chiapas (2% ISH - convenio Airbnb)</option>
+                    <option value="PUEBLA">Puebla (3% ISH - convenio Airbnb)</option>
+                    <option value="GUERRERO">Guerrero (4% ISH - convenio Airbnb)</option>
+                    <option value="NAYARIT">Nayarit (5% ISH - SIN convenio)</option>
+                    <option value="BC">Baja California (5% ISH - SIN convenio)</option>
+                    <option value="NL">Nuevo León (3% ISH - SIN convenio)</option>
+                    <option value="QUERETARO">Querétaro (2.5% ISH - SIN convenio)</option>
+                    <option value="MICHOACAN">Michoacán (3% ISH - SIN convenio)</option>
+                    <option value="COLIMA">Colima (2% ISH - SIN convenio)</option>
+                    <option value="AGUASCALIENTES">Aguascalientes (3% ISH - SIN convenio)</option>
+                    <option value="GUANAJUATO">Guanajuato (2% ISH - SIN convenio)</option>
+                    <option value="SLP">San Luis Potosí (3% ISH - SIN convenio)</option>
+                    <option value="ZACATECAS">Zacatecas (3% ISH - SIN convenio)</option>
+                    <option value="DURANGO">Durango (3% ISH - SIN convenio)</option>
+                    <option value="COAHUILA">Coahuila (3% ISH - SIN convenio)</option>
+                    <option value="TAMAULIPAS">Tamaulipas (3% ISH - SIN convenio)</option>
+                    <option value="VERACRUZ">Veracruz (2% ISH - SIN convenio)</option>
+                    <option value="HIDALGO">Hidalgo (3% ISH - SIN convenio)</option>
+                    <option value="TLAXCALA">Tlaxcala (3% ISH - SIN convenio)</option>
+                    <option value="MORELOS">Morelos (3% ISH - SIN convenio)</option>
+                    <option value="TABASCO">Tabasco (2% ISH - SIN convenio)</option>
+                    <option value="CAMPECHE">Campeche (2% ISH - SIN convenio)</option>
+                </select>
+            </div>
+        </div>
+        
+        <!-- Gastos Opcionales -->
+        <div class="card">
+            <h2 class="card-title">💸 Gastos operativos (opcional)</h2>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label class="form-label">Limpieza real</label>
+                    <input type="number" class="form-input" id="gastoLimpieza" placeholder="300" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Consumibles</label>
+                    <input type="number" class="form-input" id="gastoConsumibles" placeholder="150" min="0">
+                </div>
+            </div>
+        </div>
+        
+        <!-- Calculate Button -->
+        <button class="btn-calculate" id="btnCalcular">Calcular ganancia neta</button>
+        
+        <!-- Results -->
+        <div class="results" id="results">
+            <!-- Hero Result -->
+            <div class="result-hero">
+                <div class="result-hero-label">Tu ganancia neta</div>
+                <div class="result-hero-amount" id="gananciaNeta">$0</div>
+                <div class="result-hero-secondary" id="gananciaNetaSecondary"></div>
+            </div>
+            
+            <!-- Summary -->
+            <div class="card">
+                <div class="result-row">
+                    <span class="result-label">Ingreso bruto</span>
+                    <span class="result-value" id="ingresoBruto">$0</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Total deducciones</span>
+                    <span class="result-value negative" id="totalDeducciones">-$0</span>
+                </div>
+                <div class="result-row">
+                    <span class="result-label">Margen neto</span>
+                    <span class="result-value" id="margenNeto">0%</span>
+                </div>
+            </div>
+            
+            <!-- Detailed Breakdown -->
+            <div class="card">
+                <div class="collapsible" id="detalleComisiones">
+                    <div class="collapsible-header">
+                        <h3>📊 Comisiones de plataforma</h3>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="result-row">
+                            <span class="result-label">Comisión <span id="plataformaNombre">Airbnb</span></span>
+                            <span class="result-value negative" id="comisionPlataforma">-$0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="collapsible" id="detalleRetenciones">
+                    <div class="collapsible-header">
+                        <h3>🏛️ Retenciones fiscales</h3>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="result-row">
+                            <span class="result-label">Retención ISR</span>
+                            <span class="result-value negative" id="retencionISR">-$0</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Retención IVA</span>
+                            <span class="result-value negative" id="retencionIVA">-$0</span>
+                        </div>
+                        <div class="result-row" id="rowIVAAdicional" style="display: none;">
+                            <span class="result-label">IVA adicional (8%)</span>
+                            <span class="result-value negative" id="ivaAdicional">-$0</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="collapsible" id="detalleISH">
+                    <div class="collapsible-header">
+                        <h3>🏨 Impuesto sobre hospedaje (ISH)</h3>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="result-row">
+                            <span class="result-label" id="ishLabel">ISH</span>
+                            <span class="result-value" id="ishValor">$0</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Convenio Airbnb</span>
+                            <span class="result-value" id="ishConvenio">-</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="collapsible" id="detalleGastos">
+                    <div class="collapsible-header">
+                        <h3>💰 Gastos operativos</h3>
+                        <span class="collapsible-icon">▼</span>
+                    </div>
+                    <div class="collapsible-content">
+                        <div class="result-row">
+                            <span class="result-label">Limpieza</span>
+                            <span class="result-value negative" id="gastoLimpiezaResult">-$0</span>
+                        </div>
+                        <div class="result-row">
+                            <span class="result-label">Consumibles</span>
+                            <span class="result-value negative" id="gastoConsumiblesResult">-$0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <footer class="footer">
+            <p>Hecho con 🧡 por <a href="#">Colmena</a> 2026</p>
+            <p style="margin-top: 8px;">Los cálculos son aproximados. Consulta a tu contador.</p>
+        </footer>
+    </div>
+    
+    <script>
+        // =============================================
+        // CONSTANTES FISCALES
+        // =============================================
+        
+        const COMISIONES = {
+            airbnb: 0.03,      // Split-fee (host)
+            vrbo: 0.08,
+            booking: 0.15,
+            directa: 0
+        };
+        
+        const REGIMENES = {
+            SIN_RFC: { isr: 0.20, iva: 0.16, ivaAdicional: 0 },
+            RESICO: { isr: 0.04, iva: 0.08, ivaAdicional: 0.08 },
+            ACT_EMPRESARIAL: { isr: 0.04, iva: 0.08, ivaAdicional: 0.08 }
+        };
+        
+        const ESTADOS = {
+            // Con convenio Airbnb (Airbnb paga)
+            JALISCO: { ish: 0.03, convenio: true },
+            CDMX: { ish: 0.05, convenio: true },
+            QROO: { ish: 0.04, convenio: true },
+            YUCATAN: { ish: 0.05, convenio: true },
+            BCS: { ish: 0.05, convenio: true },
+            EDOMEX: { ish: 0.03, convenio: true },
+            OAXACA: { ish: 0.03, convenio: true },
+            SINALOA: { ish: 0.03, convenio: true },
+            SONORA: { ish: 0.02, convenio: true },
+            CHIAPAS: { ish: 0.02, convenio: true },
+            PUEBLA: { ish: 0.03, convenio: true },
+            GUERRERO: { ish: 0.04, convenio: true },
+            // Sin convenio (Host paga)
+            NAYARIT: { ish: 0.05, convenio: false },
+            BC: { ish: 0.05, convenio: false },
+            NL: { ish: 0.03, convenio: false },
+            QUERETARO: { ish: 0.025, convenio: false },
+            MICHOACAN: { ish: 0.03, convenio: false },
+            COLIMA: { ish: 0.02, convenio: false },
+            AGUASCALIENTES: { ish: 0.03, convenio: false },
+            GUANAJUATO: { ish: 0.02, convenio: false },
+            SLP: { ish: 0.03, convenio: false },
+            ZACATECAS: { ish: 0.03, convenio: false },
+            DURANGO: { ish: 0.03, convenio: false },
+            COAHUILA: { ish: 0.03, convenio: false },
+            TAMAULIPAS: { ish: 0.03, convenio: false },
+            VERACRUZ: { ish: 0.02, convenio: false },
+            HIDALGO: { ish: 0.03, convenio: false },
+            TLAXCALA: { ish: 0.03, convenio: false },
+            MORELOS: { ish: 0.03, convenio: false },
+            TABASCO: { ish: 0.02, convenio: false },
+            CAMPECHE: { ish: 0.02, convenio: false }
+        };
+        
+        // =============================================
+        // ESTADO DE LA APP
+        // =============================================
+        
+        let currentCurrency = 'MXN';
+        let tipoCambio = 20.00; // Fallback
+        let selectedPlatform = 'airbnb';
+        let deferredPrompt = null;
+        
+        // =============================================
+        // TIPO DE CAMBIO
+        // =============================================
+        
+        async function fetchTipoCambio() {
+            const cached = localStorage.getItem('tipoCambio');
+            const cachedTime = localStorage.getItem('tipoCambioTime');
+            
+            // Cache válido por 1 hora
+            if (cached && cachedTime && (Date.now() - parseInt(cachedTime)) < 3600000) {
+                tipoCambio = parseFloat(cached);
+                updateExchangeRateDisplay();
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/fx-usd');
+                const data = await response.json();
+                if (data.tipoCambio) {
+                    tipoCambio = data.tipoCambio;
+                    localStorage.setItem('tipoCambio', tipoCambio.toString());
+                    localStorage.setItem('tipoCambioTime', Date.now().toString());
+                }
+            } catch (error) {
+                console.log('Usando tipo de cambio fallback:', tipoCambio);
+            }
+            
+            updateExchangeRateDisplay();
+        }
+        
+        function updateExchangeRateDisplay() {
+            const el = document.getElementById('exchangeRate');
+            el.textContent = `TC: $1 USD = $${tipoCambio.toFixed(2)} MXN (Banxico)`;
+        }
+        
+        // =============================================
+        // CONVERSIÓN Y FORMATEO
+        // =============================================
+        
+        function convertir(monto, de, a) {
+            if (de === a) return monto;
+            if (de === 'USD' && a === 'MXN') return monto * tipoCambio;
+            if (de === 'MXN' && a === 'USD') return monto / tipoCambio;
+            return monto;
+        }
+        
+        function formatMoney(amount, currency = currentCurrency) {
+            const formatter = new Intl.NumberFormat('es-MX', {
+                style: 'currency',
+                currency: currency === 'MXN' ? 'MXN' : 'USD',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 2
+            });
+            return formatter.format(amount);
+        }
+        
+        function formatDual(montoMXN) {
+            const mxn = formatMoney(montoMXN, 'MXN');
+            const usd = formatMoney(montoMXN / tipoCambio, 'USD');
+            
+            if (currentCurrency === 'USD') {
+                return {
+                    primary: usd,
+                    secondary: `≈ ${mxn}`
+                };
+            } else {
+                return {
+                    primary: mxn,
+                    secondary: `≈ ${usd}`
+                };
+            }
+        }
+        
+        // =============================================
+        // CÁLCULO PRINCIPAL
+        // =============================================
+        
+        function calcular() {
+            // Obtener valores
+            let tarifaNoche = parseFloat(document.getElementById('tarifaNoche').value) || 0;
+            const numNoches = parseInt(document.getElementById('numNoches').value) || 1;
+            let tarifaLimpieza = parseFloat(document.getElementById('tarifaLimpieza').value) || 0;
+            const regimen = document.getElementById('regimenFiscal').value;
+            const estado = document.getElementById('estado').value;
+            let gastoLimpieza = parseFloat(document.getElementById('gastoLimpieza').value) || 0;
+            let gastoConsumibles = parseFloat(document.getElementById('gastoConsumibles').value) || 0;
+            
+            // Convertir a MXN si está en USD
+            if (currentCurrency === 'USD') {
+                tarifaNoche = convertir(tarifaNoche, 'USD', 'MXN');
+                tarifaLimpieza = convertir(tarifaLimpieza, 'USD', 'MXN');
+                gastoLimpieza = convertir(gastoLimpieza, 'USD', 'MXN');
+                gastoConsumibles = convertir(gastoConsumibles, 'USD', 'MXN');
+            }
+            
+            // 1. Ingreso bruto
+            const ingresoBruto = (tarifaNoche * numNoches) + tarifaLimpieza;
+            
+            // 2. Comisión de plataforma
+            const tasaComision = COMISIONES[selectedPlatform];
+            const comisionPlataforma = ingresoBruto * tasaComision;
+            
+            // 3. Retenciones fiscales
+            const regimenConfig = REGIMENES[regimen];
+            const retencionISR = ingresoBruto * regimenConfig.isr;
+            const retencionIVA = ingresoBruto * regimenConfig.iva;
+            const ivaAdicional = ingresoBruto * regimenConfig.ivaAdicional;
+            
+            // 4. ISH
+            const estadoConfig = ESTADOS[estado];
+            const ishCalculado = ingresoBruto * estadoConfig.ish;
+            // En Airbnb con convenio, Airbnb paga el ISH
+            const ishAPagar = (selectedPlatform === 'airbnb' && estadoConfig.convenio) ? 0 : ishCalculado;
+            
+            // 5. Gastos operativos
+            const totalGastos = gastoLimpieza + gastoConsumibles;
+            
+            // 6. Total deducciones
+            const totalDeducciones = comisionPlataforma + retencionISR + retencionIVA + ivaAdicional + ishAPagar + totalGastos;
+            
+            // 7. Ganancia neta
+            const gananciaNeta = ingresoBruto - totalDeducciones;
+            const margenNeto = ingresoBruto > 0 ? (gananciaNeta / ingresoBruto) * 100 : 0;
+            
+            // Mostrar resultados
+            mostrarResultados({
+                ingresoBruto,
+                comisionPlataforma,
+                retencionISR,
+                retencionIVA,
+                ivaAdicional,
+                ishCalculado,
+                ishAPagar,
+                tieneConvenio: selectedPlatform === 'airbnb' && estadoConfig.convenio,
+                gastoLimpieza,
+                gastoConsumibles,
+                totalDeducciones,
+                gananciaNeta,
+                margenNeto,
+                estado,
+                regimen
+            });
+        }
+        
+        function mostrarResultados(data) {
+            // Mostrar sección de resultados
+            document.getElementById('results').classList.add('show');
+            
+            // Hero - Ganancia neta
+            const gananciaFormatted = formatDual(data.gananciaNeta);
+            document.getElementById('gananciaNeta').textContent = gananciaFormatted.primary;
+            document.getElementById('gananciaNetaSecondary').textContent = gananciaFormatted.secondary;
+            
+            // Summary
+            document.getElementById('ingresoBruto').textContent = formatDual(data.ingresoBruto).primary;
+            document.getElementById('totalDeducciones').textContent = '-' + formatDual(data.totalDeducciones).primary;
+            document.getElementById('margenNeto').textContent = data.margenNeto.toFixed(1) + '%';
+            
+            // Comisiones
+            const platformNames = { airbnb: 'Airbnb', vrbo: 'Vrbo', booking: 'Booking', directa: 'Directa' };
+            document.getElementById('plataformaNombre').textContent = platformNames[selectedPlatform];
+            document.getElementById('comisionPlataforma').textContent = '-' + formatDual(data.comisionPlataforma).primary;
+            
+            // Retenciones
+            document.getElementById('retencionISR').textContent = '-' + formatDual(data.retencionISR).primary;
+            document.getElementById('retencionIVA').textContent = '-' + formatDual(data.retencionIVA).primary;
+            
+            // IVA adicional (solo RESICO y Act. Empresarial)
+            const rowIVA = document.getElementById('rowIVAAdicional');
+            if (data.ivaAdicional > 0) {
+                rowIVA.style.display = 'flex';
+                document.getElementById('ivaAdicional').textContent = '-' + formatDual(data.ivaAdicional).primary;
+            } else {
+                rowIVA.style.display = 'none';
+            }
+            
+            // ISH
+            document.getElementById('ishLabel').textContent = `ISH ${data.estado} (${(ESTADOS[data.estado].ish * 100).toFixed(1)}%)`;
+            if (data.tieneConvenio) {
+                document.getElementById('ishValor').textContent = '$0 (Airbnb lo paga)';
+                document.getElementById('ishValor').className = 'result-value positive';
+                document.getElementById('ishConvenio').textContent = '✅ Sí';
+            } else {
+                document.getElementById('ishValor').textContent = '-' + formatDual(data.ishAPagar).primary;
+                document.getElementById('ishValor').className = 'result-value negative';
+                document.getElementById('ishConvenio').textContent = '❌ No';
+            }
+            
+            // Gastos
+            document.getElementById('gastoLimpiezaResult').textContent = '-' + formatDual(data.gastoLimpieza).primary;
+            document.getElementById('gastoConsumiblesResult').textContent = '-' + formatDual(data.gastoConsumibles).primary;
+            
+            // Scroll to results
+            document.getElementById('results').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+        
+        // =============================================
+        // EVENT LISTENERS
+        // =============================================
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            // Fetch tipo de cambio
+            fetchTipoCambio();
+            
+            // Currency toggle
+            document.querySelectorAll('.currency-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.currency-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCurrency = btn.dataset.currency;
+                });
+            });
+            
+            // Platform selector
+            document.querySelectorAll('.platform-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    document.querySelectorAll('.platform-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    selectedPlatform = btn.dataset.platform;
+                });
+            });
+            
+            // Collapsibles
+            document.querySelectorAll('.collapsible-header').forEach(header => {
+                header.addEventListener('click', () => {
+                    header.parentElement.classList.toggle('open');
+                });
+            });
+            
+            // Calculate button
+            document.getElementById('btnCalcular').addEventListener('click', calcular);
+            
+            // PWA Install
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+                document.getElementById('installBanner').classList.add('show');
+            });
+            
+            document.getElementById('installBtn').addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        document.getElementById('installBanner').classList.remove('show');
+                    }
+                    deferredPrompt = null;
+                }
+            });
+            
+            // Register Service Worker
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('/sw.js');
+            }
+        });
+    </script>
+</body>
+</html>
