@@ -21,7 +21,7 @@
 
     <link rel="manifest" href="/manifest.json">
     <link rel="icon" type="image/png" href="/icon-192.png">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script defer src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; }
@@ -141,34 +141,34 @@
 <body>
     <div class="container">
         <header class="header"><h1 id="appTitle">🏠 Anfitrion MX</h1><p id="subtitle">Calculadora para Anfitriones</p></header>
-        <div class="lang-toggle"><button class="lang-btn active" data-lang="es">🇲🇽 ES</button><button class="lang-btn" data-lang="en">🇺🇸 EN</button></div>
-        <div class="install-banner" id="installBanner"><p id="installText">📲 Instala la app</p><button class="install-btn" id="installBtn">Instalar</button></div>
-        <div class="currency-toggle"><button class="currency-btn active" data-currency="MXN">🇲🇽 Pesos MXN</button><button class="currency-btn" data-currency="USD">🇺🇸 Dólares USD</button></div>
+        <div class="lang-toggle"><button type="button" class="lang-btn active" data-lang="es" aria-label="Cambiar a español">🇲🇽 ES</button><button type="button" class="lang-btn" data-lang="en" aria-label="Switch to English">🇺🇸 EN</button></div>
+        <div class="install-banner" id="installBanner"><p id="installText">📲 Instala la app</p><button type="button" class="install-btn" id="installBtn">Instalar</button></div>
+        <div class="currency-toggle"><button type="button" class="currency-btn active" data-currency="MXN" aria-label="Usar pesos mexicanos">🇲🇽 Pesos MXN</button><button type="button" class="currency-btn" data-currency="USD" aria-label="Use US dollars">🇺🇸 Dólares USD</button></div>
         <div class="exchange-rate" id="exchangeRate">Cargando tipo de cambio...</div>
         
         <div class="card">
             <h2 class="card-title" id="cardTitleReserva">📋 Datos de la reserva</h2>
             <div class="form-group"><label class="form-label" id="labelPlataforma">Plataforma</label>
                 <div class="platform-selector">
-                    <button class="platform-btn active" data-platform="airbnb">Airbnb<span class="platform-fee">3%</span></button>
-                    <button class="platform-btn" data-platform="airbnb15">Airbnb<span class="platform-fee">15%</span></button>
-                    <button class="platform-btn" data-platform="vrbo">Vrbo<span class="platform-fee">8%</span></button>
-                    <button class="platform-btn" data-platform="booking">Booking<span class="platform-fee">15%</span></button>
-                    <button class="platform-btn" data-platform="directa">Directa<span class="platform-fee">0%</span></button>
+                    <button type="button" class="platform-btn active" data-platform="airbnb">Airbnb<span class="platform-fee">3%</span></button>
+                    <button type="button" class="platform-btn" data-platform="airbnb15">Airbnb<span class="platform-fee">15%</span></button>
+                    <button type="button" class="platform-btn" data-platform="vrbo">Vrbo<span class="platform-fee">8%</span></button>
+                    <button type="button" class="platform-btn" data-platform="booking">Booking<span class="platform-fee">15%</span></button>
+                    <button type="button" class="platform-btn" data-platform="directa">Directa<span class="platform-fee">0%</span></button>
                 </div>
             </div>
             <div class="form-row">
-                <div class="form-group"><label class="form-label" id="labelTarifa">Tarifa por noche</label><input type="number" class="form-input" id="tarifaNoche" min="0"></div>
-                <div class="form-group"><label class="form-label" id="labelNoches">Número de noches</label><input type="number" class="form-input" id="numNoches" min="1"></div>
+                <div class="form-group"><label class="form-label" id="labelTarifa" for="tarifaNoche">Tarifa por noche</label><input type="number" class="form-input" id="tarifaNoche" min="0" max="1000000"></div>
+                <div class="form-group"><label class="form-label" id="labelNoches" for="numNoches">Número de noches</label><input type="number" class="form-input" id="numNoches" min="1" max="365"></div>
             </div>
         </div>
         
         <div class="card">
             <h2 class="card-title" id="cardTitleFiscal">💼 Régimen fiscal</h2>
-            <div class="form-group"><label class="form-label" id="labelRegimen">Tu régimen fiscal</label>
+            <div class="form-group"><label class="form-label" id="labelRegimen" for="regimenFiscal">Tu régimen fiscal</label>
                 <select class="form-select" id="regimenFiscal"><option value="SIN_RFC">Sin RFC (retención máxima)</option><option value="RESICO">RESICO</option><option value="ACT_EMPRESARIAL">Actividad Empresarial</option></select>
             </div>
-            <div class="form-group"><label class="form-label" id="labelEstado">Estado donde está tu propiedad</label>
+            <div class="form-group"><label class="form-label" id="labelEstado" for="estado">Estado donde está tu propiedad</label>
                 <select class="form-select" id="estado"><option value="JALISCO">Jalisco (3% ISH - convenio Airbnb)</option><option value="CDMX">CDMX (5% ISH - convenio Airbnb)</option><option value="QROO">Quintana Roo (4% ISH - convenio Airbnb)</option><option value="YUCATAN">Yucatán (5% ISH - convenio Airbnb)</option><option value="BCS">Baja California Sur (5% ISH - convenio Airbnb)</option><option value="EDOMEX">Estado de México (3% ISH - convenio Airbnb)</option><option value="OAXACA">Oaxaca (3% ISH - convenio Airbnb)</option><option value="SINALOA">Sinaloa (3% ISH - convenio Airbnb)</option><option value="SONORA">Sonora (2% ISH - convenio Airbnb)</option><option value="CHIAPAS">Chiapas (2% ISH - convenio Airbnb)</option><option value="PUEBLA">Puebla (3% ISH - convenio Airbnb)</option><option value="GUERRERO">Guerrero (4% ISH - convenio Airbnb)</option><option value="NAYARIT">Nayarit (5% ISH - SIN convenio)</option><option value="BC">Baja California (5% ISH - SIN convenio)</option><option value="NL">Nuevo León (3% ISH - SIN convenio)</option><option value="QUERETARO">Querétaro (2.5% ISH - SIN convenio)</option><option value="MICHOACAN">Michoacán (3% ISH - SIN convenio)</option><option value="COLIMA">Colima (2% ISH - SIN convenio)</option><option value="AGUASCALIENTES">Aguascalientes (3% ISH - SIN convenio)</option><option value="GUANAJUATO">Guanajuato (2% ISH - SIN convenio)</option><option value="SLP">San Luis Potosí (3% ISH - SIN convenio)</option><option value="ZACATECAS">Zacatecas (3% ISH - SIN convenio)</option><option value="DURANGO">Durango (3% ISH - SIN convenio)</option><option value="COAHUILA">Coahuila (3% ISH - SIN convenio)</option><option value="TAMAULIPAS">Tamaulipas (3% ISH - SIN convenio)</option><option value="VERACRUZ">Veracruz (2% ISH - SIN convenio)</option><option value="HIDALGO">Hidalgo (3% ISH - SIN convenio)</option><option value="TLAXCALA">Tlaxcala (3% ISH - SIN convenio)</option><option value="MORELOS">Morelos (3% ISH - SIN convenio)</option><option value="TABASCO">Tabasco (2% ISH - SIN convenio)</option><option value="CAMPECHE">Campeche (2% ISH - SIN convenio)</option></select>
             </div>
         </div>
@@ -176,10 +176,10 @@
         <div class="card">
             <h2 class="card-title" id="cardTitleGastos">💸 Gastos operativos</h2>
             <div class="form-row">
-                <div class="form-group"><label class="form-label" id="labelLimpiezaCobrada">Limpieza cobrada</label><input type="number" class="form-input" id="tarifaLimpieza" min="0"></div>
-                <div class="form-group"><label class="form-label" id="labelLimpiezaReal">Limpieza real</label><input type="number" class="form-input" id="gastoLimpieza" min="0"></div>
+                <div class="form-group"><label class="form-label" id="labelLimpiezaCobrada" for="tarifaLimpieza">Limpieza cobrada</label><input type="number" class="form-input" id="tarifaLimpieza" min="0" max="100000"></div>
+                <div class="form-group"><label class="form-label" id="labelLimpiezaReal" for="gastoLimpieza">Limpieza real</label><input type="number" class="form-input" id="gastoLimpieza" min="0" max="100000"></div>
             </div>
-            <div class="form-group"><label class="form-label" id="labelConsumibles">Consumibles</label><input type="number" class="form-input" id="gastoConsumibles" min="0"></div>
+            <div class="form-group"><label class="form-label" id="labelConsumibles" for="gastoConsumibles">Consumibles</label><input type="number" class="form-input" id="gastoConsumibles" min="0" max="100000"></div>
         </div>
         
         <button class="btn-calculate" id="btnCalcular"><span id="btnCalcularText">Ver cuánto me queda</span></button>
@@ -243,7 +243,7 @@
                 else el.style.background='#ef4444';
             }
         }
-        function updateLanguage(){const t=TEXTS[currentLang];document.getElementById('appTitle').textContent=t.appTitle;document.getElementById('subtitle').textContent=t.subtitle;document.getElementById('cardTitleReserva').textContent=t.cardTitleReserva;document.getElementById('labelPlataforma').textContent=t.labelPlataforma;document.getElementById('labelTarifa').textContent=t.labelTarifa;document.getElementById('labelNoches').textContent=t.labelNoches;document.getElementById('cardTitleFiscal').textContent=t.cardTitleFiscal;document.getElementById('labelRegimen').textContent=t.labelRegimen;document.getElementById('labelEstado').textContent=t.labelEstado;document.getElementById('cardTitleGastos').textContent=t.cardTitleGastos;document.getElementById('labelLimpiezaCobrada').textContent=t.labelLimpiezaCobrada;document.getElementById('labelLimpiezaReal').textContent=t.labelLimpiezaReal;document.getElementById('labelConsumibles').textContent=t.labelConsumibles;document.getElementById('btnCalcularText').textContent=t.btnCalcular;document.getElementById('labelGananciaNeta').textContent=t.labelGananciaNeta;document.getElementById('btnPdfText').textContent=t.btnPdf;document.getElementById('btnDesgloseText').textContent=desgloseExpanded?t.btnDesgloseHide:t.btnDesglose;document.getElementById('labelIngresoBruto').textContent=t.labelIngresoBruto;document.getElementById('labelTotalDeducciones').innerHTML='<strong>'+t.labelTotalDeducciones+'</strong>';document.getElementById('labelRetencionISR').textContent=t.labelRetencionISR;document.getElementById('labelRetencionIVA').textContent=t.labelRetencionIVA;document.getElementById('labelIVAAdicional').textContent=t.labelIVAAdicional;document.getElementById('labelGastoLimpieza').textContent=t.labelGastoLimpieza;document.getElementById('labelGastoConsumibles').textContent=t.labelGastoConsumibles;document.getElementById('disclaimer').innerHTML=t.disclaimer;document.getElementById('notaPVTitulo').textContent=t.notaPVTitulo;document.getElementById('notaPVTexto').textContent=t.notaPVTexto;document.getElementById('notaPVDisclaimer').innerHTML=t.notaPVDisclaimer;updateExchangeRateDisplay();updateCreditDisplay();}
+        function updateLanguage(){document.documentElement.lang=currentLang==='es'?'es':'en';const t=TEXTS[currentLang];document.getElementById('appTitle').textContent=t.appTitle;document.getElementById('subtitle').textContent=t.subtitle;document.getElementById('cardTitleReserva').textContent=t.cardTitleReserva;document.getElementById('labelPlataforma').textContent=t.labelPlataforma;document.getElementById('labelTarifa').textContent=t.labelTarifa;document.getElementById('labelNoches').textContent=t.labelNoches;document.getElementById('cardTitleFiscal').textContent=t.cardTitleFiscal;document.getElementById('labelRegimen').textContent=t.labelRegimen;document.getElementById('labelEstado').textContent=t.labelEstado;document.getElementById('cardTitleGastos').textContent=t.cardTitleGastos;document.getElementById('labelLimpiezaCobrada').textContent=t.labelLimpiezaCobrada;document.getElementById('labelLimpiezaReal').textContent=t.labelLimpiezaReal;document.getElementById('labelConsumibles').textContent=t.labelConsumibles;document.getElementById('btnCalcularText').textContent=t.btnCalcular;document.getElementById('labelGananciaNeta').textContent=t.labelGananciaNeta;document.getElementById('btnPdfText').textContent=t.btnPdf;document.getElementById('btnDesgloseText').textContent=desgloseExpanded?t.btnDesgloseHide:t.btnDesglose;document.getElementById('labelIngresoBruto').textContent=t.labelIngresoBruto;document.getElementById('labelTotalDeducciones').innerHTML='<strong>'+t.labelTotalDeducciones+'</strong>';document.getElementById('labelRetencionISR').textContent=t.labelRetencionISR;document.getElementById('labelRetencionIVA').textContent=t.labelRetencionIVA;document.getElementById('labelIVAAdicional').textContent=t.labelIVAAdicional;document.getElementById('labelGastoLimpieza').textContent=t.labelGastoLimpieza;document.getElementById('labelGastoConsumibles').textContent=t.labelGastoConsumibles;document.getElementById('disclaimer').innerHTML=t.disclaimer;document.getElementById('notaPVTitulo').textContent=t.notaPVTitulo;document.getElementById('notaPVTexto').textContent=t.notaPVTexto;document.getElementById('notaPVDisclaimer').innerHTML=t.notaPVDisclaimer;updateExchangeRateDisplay();updateCreditDisplay();}
         async function fetchTipoCambio(){const cached=localStorage.getItem('tipoCambio'),cachedTime=localStorage.getItem('tipoCambioTime');if(cached&&cachedTime&&(Date.now()-parseInt(cachedTime))<3600000){tipoCambio=parseFloat(cached);updateExchangeRateDisplay();return;}try{const r=await fetch('/api/fx-usd');const d=await r.json();if(d.tipoCambio){tipoCambio=d.tipoCambio;localStorage.setItem('tipoCambio',tipoCambio.toString());localStorage.setItem('tipoCambioTime',Date.now().toString());}}catch(e){}updateExchangeRateDisplay();}
         function updateExchangeRateDisplay(){document.getElementById('exchangeRate').textContent=TEXTS[currentLang].exchangeRate.replace('{{rate}}',tipoCambio.toFixed(2));}
         function convertir(m,de,a){if(de===a)return m;if(de==='USD'&&a==='MXN')return m*tipoCambio;if(de==='MXN'&&a==='USD')return m/tipoCambio;return m;}
