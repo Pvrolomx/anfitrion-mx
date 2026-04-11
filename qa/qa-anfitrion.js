@@ -441,6 +441,93 @@ async function suite8_Browser() {
   }
 }
 
+// ─── Suite 10: PDF Golden Snapshot ───────────────────────────
+// Protege el formato del PDF contra cambios accidentales.
+// GOLDEN_HASH = hash SHA-256 de generatePDF en su version aprobada.
+// Si cambia sin que el dev lo apruebe, el test falla con bug CRITICO.
+// Para aprobar un cambio intencional:
+//   node qa-anfitrion.js --update-pdf-snapshot
+
+const GOLDEN_HASH = 'd4565c3d70298db983b21d0ee10875c91e5928cb1594291bc1137384a1f51971';
+
+const GOLDEN_MARKERS = [
+  // [marker, pos_min, pos_max] — presencia Y orden obligatorios
+  ['window.jspdf&&window.jspdf.jsPDF',    0,   300],
+  ['Anfitrion MX',                       800,  1800],
+  ['doc.line',                          1400,  2200],
+  ['Plataforma:',                       1600,  2600],
+  ['function drawRow',                  2500,  3500],
+  ['function drawISHConvenio',          3200,  4000],
+  ['Ingreso bruto',                     3700,  4500],
+  ['comisionPlataforma>0',              3900,  4700],
+  ['retencionISR>0',                    4000,  4900],
+  ['retencionIVA>0',                    4100,  5000],
+  ['ivaAdicional>0',                    4300,  5300],
+  ['tieneConvenio',                     4600,  5500],
+  ['gastoLimpieza>0',                   4800,  5700],
+  ['gastoConsumibles>0',                4900,  5800],
+  ['Total deducciones',                 5000,  5900],
+  ['Tu ganancia neta',                  5400,  6300],
+  ['doc.save(',                         6000,  6800],
+];
+
+async function suite10_PDFSnapshot(html) {
+  log('\n🔒 SUITE 10 — PDF Snapshot (proteccion de formato)');
+  const crypto = require('crypto');
+  const UPDATE = process.argv.includes('--update-pdf-snapshot');
+
+  const idx = html.indexOf('async function generatePDF');
+  const endIdx = html.indexOf('document.addEventListener', idx);
+  if (idx === -1) { result('10a','PDF','generatePDF() encontrada','FAIL'); return; }
+  result('10a','PDF','generatePDF() encontrada en HTML','PASS');
+
+  const fn   = html.slice(idx, endIdx).trim();
+  const hash = crypto.createHash('sha256').update(fn).digest('hex');
+
+  if (UPDATE) {
+    log(`\n  MODO UPDATE — Nuevo hash aprobado:\n  ${hash}`);
+    log('  Reemplaza GOLDEN_HASH en qa-anfitrion.js\n');
+    result('10b','PDF','Hash snapshot (modo update)','WARN',`hash: ${hash.substring(0,16)}...`);
+  } else {
+    const ok = hash === GOLDEN_HASH;
+    result('10b','PDF','Hash generatePDF = golden snapshot', ok ? 'PASS' : 'FAIL',
+      ok ? hash.substring(0,16)+'...' : `esperado ${GOLDEN_HASH.substring(0,16)}... recibido ${hash.substring(0,16)}...`);
+    if (!ok) bug('🔴','generatePDF modificada — formato PDF puede estar roto',
+      'Si el cambio es intencional: node qa-anfitrion.js --update-pdf-snapshot');
+  }
+
+  // Verificar markers estructurales — orden y presencia
+  let bad = 0;
+  for (const [m, mn, mx] of GOLDEN_MARKERS) {
+    const pos = fn.indexOf(m);
+    if (pos === -1) {
+      result('10c','PDF',`Marker: "${m.substring(0,35)}"`, 'FAIL', 'ELIMINADO del codigo PDF');
+      bug('🔴', `PDF marker eliminado: "${m.substring(0,35)}"`, 'Desglose del PDF puede estar incompleto'); bad++;
+    } else if (pos < mn || pos > mx) {
+      result('10c','PDF',`Marker: "${m.substring(0,35)}"`, 'WARN', `pos=${pos} fuera de rango [${mn}-${mx}]`); bad++;
+    } else {
+      result('10c','PDF',`Marker: "${m.substring(0,35)}"`, 'PASS', `pos=${pos}`);
+    }
+  }
+
+  // Checks especificos de integridad visual
+  const noEmoji = !fn.includes('\\uD83D') && !fn.includes('\\u1F4C4');
+  result('10d','PDF','Sin emojis surrogate (evita texto garbled)', noEmoji ? 'PASS' : 'FAIL');
+  if (!noEmoji) bug('🟡','PDF: emojis surrogate -> texto garbled','Usar texto plano en jsPDF');
+
+  const titleFirst = fn.indexOf('Anfitrion MX') < fn.indexOf('doc.line');
+  result('10e','PDF','Titulo antes de linea (header correcto)', titleFirst ? 'PASS' : 'FAIL');
+  if (!titleFirst) bug('🟡','PDF: linea verde tapa el titulo','Mover doc.line despues del texto del header');
+
+  const hasScript = html.includes('jspdf.umd.min.js');
+  result('10f','PDF','Script jspdf.umd.min.js en HTML', hasScript ? 'PASS' : 'FAIL');
+  if (!hasScript) bug('🔴','jsPDF script eliminado — PDF en blanco','Restaurar tag script de jspdf.umd.min.js');
+
+  if (bad === 0 && hash === GOLDEN_HASH) log('  ✅ Formato PDF PROTEGIDO — sin cambios');
+  else if (bad === 0) log('  ⚠️  Hash cambio pero estructura OK — actualiza GOLDEN_HASH si fue intencional');
+  else log(`  ❌ ${bad} problema(s) en estructura del PDF`);
+}
+
 // ─── Suite 9: FX API ─────────────────────────────────────────
 async function suite9_FX() {
   log('\n💱 SUITE 9 — Tipo de cambio');
@@ -512,6 +599,7 @@ async function main() {
   await suite7_I18N(html);
   await suite9_FX();
   await suite8_Browser();   // al final porque tarda más
+  await suite10_PDFSnapshot(html); // snapshot siempre al final
 
   const total = passed + failed + warned;
   log('\n' + '═'.repeat(50));
