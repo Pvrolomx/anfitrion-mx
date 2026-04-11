@@ -260,151 +260,100 @@
   try{
     const data=lastCalculation;
     const t=TEXTS[currentLang];
-    const plataformasLabel={
-      airbnb:'Airbnb 3%',
-      airbnb15:'Airbnb 15.5%',
-      vrbo:'Vrbo 8%',
-      booking:'Booking 15%',
-      directa:'Directa 0%'
-    };
-    const regimenesLabel={
-      SIN_RFC:'Sin RFC (retención 20%)',
-      RESICO:'RESICO (4% ISR)',
-      ACT_EMPRESARIAL:'Plataformas Digitales (4% ISR)'
-    };
+    const plataformasLabel={airbnb:'Airbnb 3%',airbnb15:'Airbnb 15.5%',vrbo:'Vrbo 8%',booking:'Booking 15%',directa:'Directa 0%'};
+    const regimenesLabel={SIN_RFC:'Sin RFC (retención 20%)',RESICO:'RESICO (4% ISR)',ACT_EMPRESARIAL:'Plataformas Digitales (4% ISR)'};
 
-    // Filas de la tabla — orden: ingreso bruto → deducciones → total → ganancia neta
-    let rows='';
-
-    // 1. Ingreso bruto — siempre, header verde
-    rows+=`<tr style="background:#f0fdf4;">
-      <td style="padding:11px 14px;font-weight:700;color:#065f46;border:1px solid #a7f3d0;">Ingreso bruto</td>
-      <td style="padding:11px 14px;text-align:right;font-weight:700;color:#059669;font-size:15px;border:1px solid #a7f3d0;">${formatMoney(data.ingresoBruto,'MXN')}</td>
-    </tr>`;
-
-    // 2. Comisión plataforma
-    if(data.comisionPlataforma>0){
-      rows+=`<tr>
-        <td style="padding:9px 14px;color:#475569;border:1px solid #e2e8f0;">Comisión ${plataformasLabel[data.plataforma]||data.plataforma}</td>
-        <td style="padding:9px 14px;text-align:right;color:#dc2626;border:1px solid #e2e8f0;">-${formatMoney(data.comisionPlataforma,'MXN')}</td>
-      </tr>`;
+    // Helper de fila — retorna string HTML
+    function row(label,value,color,bg){
+      var bg2=bg||'#ffffff';
+      var col=color||'#1e293b';
+      return '<tr style="background:'+bg2+'"><td style="padding:10px 14px;color:#475569;border:1px solid #e2e8f0;">'+label+'</td><td style="padding:10px 14px;text-align:right;font-weight:600;color:'+col+';border:1px solid #e2e8f0;">'+value+'</td></tr>';
     }
 
-    // 3. Retención ISR
-    if(data.retencionISR>0){
-      rows+=`<tr style="background:#f8fafc;">
-        <td style="padding:9px 14px;color:#475569;border:1px solid #e2e8f0;">${t.labelRetencionISR}</td>
-        <td style="padding:9px 14px;text-align:right;color:#dc2626;border:1px solid #e2e8f0;">-${formatMoney(data.retencionISR,'MXN')}</td>
-      </tr>`;
-    }
+    var rows='';
 
-    // 4. Retención IVA
-    if(data.retencionIVA>0){
-      rows+=`<tr>
-        <td style="padding:9px 14px;color:#475569;border:1px solid #e2e8f0;">${t.labelRetencionIVA}</td>
-        <td style="padding:9px 14px;text-align:right;color:#dc2626;border:1px solid #e2e8f0;">-${formatMoney(data.retencionIVA,'MXN')}</td>
-      </tr>`;
-    }
+    // 1. Ingreso bruto
+    rows+=row('Ingreso bruto',formatMoney(data.ingresoBruto,'MXN'),'#059669','#f0fdf4');
 
-    // 5. IVA adicional — solo si aplica (RESICO / Act. Empresarial)
-    if(data.ivaAdicional>0){
-      rows+=`<tr style="background:#f8fafc;">
-        <td style="padding:9px 14px;color:#475569;border:1px solid #e2e8f0;">${t.labelIVAAdicional}</td>
-        <td style="padding:9px 14px;text-align:right;color:#dc2626;border:1px solid #e2e8f0;">-${formatMoney(data.ivaAdicional,'MXN')}</td>
-      </tr>`;
-    }
+    // 2. Comisión
+    if(data.comisionPlataforma>0)
+      rows+=row('Comisión '+(plataformasLabel[data.plataforma]||''),'-'+formatMoney(data.comisionPlataforma,'MXN'),'#dc2626','#ffffff');
 
-    // 6. ISH — mostrar siempre (con o sin convenio)
-    const ishPct=ESTADOS[data.estado]?((ESTADOS[data.estado].ish*100).toFixed(1)+'%'):'';
-    const ishLabel='ISH '+data.estado+(ishPct?' ('+ishPct+')':'');
+    // 3. ISR
+    if(data.retencionISR>0)
+      rows+=row(t.labelRetencionISR,'-'+formatMoney(data.retencionISR,'MXN'),'#dc2626','#f8fafc');
+
+    // 4. IVA
+    if(data.retencionIVA>0)
+      rows+=row(t.labelRetencionIVA,'-'+formatMoney(data.retencionIVA,'MXN'),'#dc2626','#ffffff');
+
+    // 5. IVA adicional
+    if(data.ivaAdicional>0)
+      rows+=row(t.labelIVAAdicional,'-'+formatMoney(data.ivaAdicional,'MXN'),'#dc2626','#f8fafc');
+
+    // 6. ISH
+    var ishPct=ESTADOS[data.estado]?((ESTADOS[data.estado].ish*100).toFixed(1)+'%'):'';
+    var ishLabel='ISH '+data.estado+(ishPct?' ('+ishPct+')':'');
     if(data.tieneConvenio){
-      rows+=`<tr>
-        <td style="padding:9px 14px;color:#475569;border:1px solid #e2e8f0;">${ishLabel}</td>
-        <td style="padding:9px 14px;text-align:right;color:#059669;font-style:italic;border:1px solid #e2e8f0;">${t.airbnbPaga}</td>
-      </tr>`;
-    } else if(data.ishAPagar>0){
-      rows+=`<tr>
-        <td style="padding:9px 14px;color:#475569;border:1px solid #e2e8f0;">${ishLabel}</td>
-        <td style="padding:9px 14px;text-align:right;color:#dc2626;border:1px solid #e2e8f0;">-${formatMoney(data.ishAPagar,'MXN')}</td>
-      </tr>`;
+      rows+=row(ishLabel,t.airbnbPaga,'#059669','#ffffff');
+    }else if(data.ishAPagar>0){
+      rows+=row(ishLabel,'-'+formatMoney(data.ishAPagar,'MXN'),'#dc2626','#ffffff');
     }
 
-    // 7. Limpieza — solo si hay gasto
-    if(data.gastoLimpieza>0){
-      rows+=`<tr style="background:#f8fafc;">
-        <td style="padding:9px 14px;color:#475569;border:1px solid #e2e8f0;">${t.labelGastoLimpieza}</td>
-        <td style="padding:9px 14px;text-align:right;color:#dc2626;border:1px solid #e2e8f0;">-${formatMoney(data.gastoLimpieza,'MXN')}</td>
-      </tr>`;
-    }
+    // 7. Limpieza
+    if(data.gastoLimpieza>0)
+      rows+=row(t.labelGastoLimpieza,'-'+formatMoney(data.gastoLimpieza,'MXN'),'#dc2626','#f8fafc');
 
-    // 8. Consumibles — solo si hay gasto
-    if(data.gastoConsumibles>0){
-      rows+=`<tr>
-        <td style="padding:9px 14px;color:#475569;border:1px solid #e2e8f0;">${t.labelGastoConsumibles}</td>
-        <td style="padding:9px 14px;text-align:right;color:#dc2626;border:1px solid #e2e8f0;">-${formatMoney(data.gastoConsumibles,'MXN')}</td>
-      </tr>`;
-    }
+    // 8. Consumibles
+    if(data.gastoConsumibles>0)
+      rows+=row(t.labelGastoConsumibles,'-'+formatMoney(data.gastoConsumibles,'MXN'),'#dc2626','#ffffff');
 
-    // 9. Subtotal deducciones
-    rows+=`<tr style="background:#fef2f2;">
-      <td style="padding:10px 14px;font-weight:600;color:#991b1b;border:1px solid #fecaca;">Total deducciones</td>
-      <td style="padding:10px 14px;text-align:right;font-weight:700;color:#dc2626;border:1px solid #fecaca;">-${formatMoney(data.totalDeducciones,'MXN')}</td>
-    </tr>`;
+    // 9. Total deducciones
+    rows+='<tr style="background:#fef2f2;"><td style="padding:10px 14px;font-weight:700;color:#991b1b;border:1px solid #fecaca;">Total deducciones</td><td style="padding:10px 14px;text-align:right;font-weight:700;color:#dc2626;border:1px solid #fecaca;">-'+formatMoney(data.totalDeducciones,'MXN')+'</td></tr>';
 
-    // 10. Ganancia neta — siempre al final, destacada
-    rows+=`<tr style="background:#10b981;">
-      <td style="padding:14px;font-weight:700;color:#ffffff;font-size:14px;border:1px solid #059669;">${t.labelGananciaNeta}</td>
-      <td style="padding:14px;text-align:right;font-weight:700;font-size:18px;color:#ffffff;border:1px solid #059669;">${formatMoney(data.gananciaNeta,'MXN')}</td>
-    </tr>`;
+    // 10. Ganancia neta — al final, destacada
+    rows+='<tr style="background:#10b981;"><td style="padding:14px;font-weight:700;color:#ffffff;font-size:15px;border:2px solid #059669;">'+t.labelGananciaNeta+'</td><td style="padding:14px;text-align:right;font-weight:700;font-size:19px;color:#ffffff;border:2px solid #059669;">'+formatMoney(data.gananciaNeta,'MXN')+'</td></tr>';
 
-    // Construir HTML del PDF
-    const pdfHtml=`<div style="font-family:Arial,Helvetica,sans-serif;background:#ffffff;color:#1e293b;width:520px;margin:0 auto;padding:32px 28px;">
-      <div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #10b981;">
-        <div style="font-size:32px;margin-bottom:6px;">🏠</div>
-        <h1 style="color:#10b981;font-size:22px;font-weight:700;margin:0 0 4px 0;">Anfitrión MX</h1>
-        <p style="color:#64748b;font-size:11px;margin:0;">Calculadora Fiscal para Anfitriones</p>
-      </div>
-      <div style="margin-bottom:18px;padding:10px 14px;background:#f8fafc;border-radius:6px;font-size:11px;color:#475569;border:1px solid #e2e8f0;">
-        <span style="margin-right:18px;">📋 <strong>${plataformasLabel[data.plataforma]||data.plataforma}</strong></span>
-        <span style="margin-right:18px;">📍 <strong>${data.estado}</strong></span>
-        <span>🧾 <strong>${regimenesLabel[data.regimen]||data.regimen}</strong></span>
-      </div>
-      <table style="width:100%;border-collapse:collapse;font-size:13px;">${rows}</table>
-      <div style="margin-top:18px;font-size:9px;color:#94a3b8;text-align:center;padding-top:14px;border-top:1px solid #e2e8f0;">
-        <p style="margin:0 0 3px;">anfitrion.expatadvisormx.com</p>
-        <p style="margin:0;">⚠️ Cálculos aproximados con fines informativos. No constituyen asesoría fiscal ni legal.</p>
-      </div>
-    </div>`;
+    // HTML completo del PDF — fondo blanco explícito en todos los niveles
+    var pdfHtml='<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,Helvetica,sans-serif;background:#ffffff;color:#1e293b;}</style></head><body style="background:#ffffff;padding:0;margin:0;">'
+      +'<div style="width:550px;margin:0 auto;padding:32px 24px;background:#ffffff;">'
+      +'<div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #10b981;">'
+      +'<p style="font-size:30px;margin-bottom:4px;">&#x1F3E0;</p>'
+      +'<h1 style="color:#10b981;font-size:22px;font-weight:700;margin:0 0 4px 0;">Anfi&#x200B;tri&#xF3;n MX</h1>'
+      +'<p style="color:#64748b;font-size:11px;margin:0;">Calculadora Fiscal para Anfitriones</p>'
+      +'</div>'
+      +'<div style="margin-bottom:18px;padding:10px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;font-size:11px;color:#475569;">'
+      +'<strong>Plataforma:</strong> '+(plataformasLabel[data.plataforma]||data.plataforma)
+      +'&nbsp;&nbsp;&nbsp;<strong>Estado:</strong> '+data.estado
+      +'&nbsp;&nbsp;&nbsp;<strong>R&eacute;gimen:</strong> '+(regimenesLabel[data.regimen]||data.regimen)
+      +'</div>'
+      +'<table style="width:100%;border-collapse:collapse;font-size:13px;background:#ffffff;">'+rows+'</table>'
+      +'<div style="margin-top:20px;padding-top:14px;border-top:1px solid #e2e8f0;text-align:center;font-size:9px;color:#94a3b8;">'
+      +'<p style="margin:0 0 3px;">anfitrion.expatadvisormx.com</p>'
+      +'<p style="margin:0;">&#x26A0;&#xFE0F; C&aacute;lculos aproximados. No constituyen asesor&iacute;a fiscal ni legal.</p>'
+      +'</div>'
+      +'</div></body></html>';
 
-    // Montar en DOM (position:absolute, no fixed — html2canvas captura mejor)
-    const container=document.createElement('div');
-    container.style.cssText='position:absolute;left:-9999px;top:0;width:580px;background:#ffffff;';
-    container.innerHTML=pdfHtml;
-    document.body.appendChild(container);
-
-    // AWAIT — crítico: sin esto el container se elimina antes de renderizar
+    // Usar .from(htmlString) — NO monta nada en el DOM
+    // html2pdf crea un iframe interno y lo renderiza limpiamente
     await html2pdf().set({
-      margin:[8,8,8,8],
+      margin:10,
       filename:'anfitrion-mx-reporte.pdf',
       image:{type:'jpeg',quality:0.98},
       html2canvas:{
         scale:2,
-        backgroundColor:'#ffffff',
         useCORS:true,
-        allowTaint:false,
-        logging:false,
-        windowWidth:600
+        logging:false
       },
       jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-    }).from(container).save();
-
-    document.body.removeChild(container);
+    }).from(pdfHtml,'string').save();
 
   }catch(e){
+    console.error('PDF error:',e);
     alert('Error al generar PDF: '+e.message);
   }finally{
     btn.disabled=false;
-    btn.innerHTML='📄 '+TEXTS[currentLang].btnPdf;
+    btn.innerHTML='&#x1F4C4; '+TEXTS[currentLang].btnPdf;
   }
 }
         document.addEventListener('DOMContentLoaded',()=>{const params=new URLSearchParams(window.location.search);if(params.get('payment')==='success'){addCredits(10);window.history.replaceState({},document.title,'/');setTimeout(()=>{alert('✅ '+TEXTS[currentLang].pagoExitoso);},300);}fetchTipoCambio();updateCreditDisplay();document.querySelectorAll('.lang-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.lang-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentLang=b.dataset.lang;localStorage.setItem('anfitrion_lang',currentLang);updateLanguage();}));const sl=localStorage.getItem('anfitrion_lang');if(sl){currentLang=sl;document.querySelectorAll('.lang-btn').forEach(b=>b.classList.toggle('active',b.dataset.lang===currentLang));updateLanguage();}document.querySelectorAll('.currency-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.currency-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');currentCurrency=b.dataset.currency;}));document.querySelectorAll('.platform-btn').forEach(b=>b.addEventListener('click',()=>{document.querySelectorAll('.platform-btn').forEach(x=>x.classList.remove('active'));b.classList.add('active');selectedPlatform=b.dataset.platform;const w=document.getElementById('warningResico');const r=document.getElementById('regimenFiscal').value;w.style.display=(r==='RESICO'&&selectedPlatform!=='directa')?'block':'none';}));document.getElementById('btnCalcular').addEventListener('click',calcular);document.getElementById('btnDescargarPDF').addEventListener('click',generatePDF);document.getElementById('btnComprar').addEventListener('click',function(){window.open('https://ko-fi.com/condoadviser','_blank');});document.getElementById('btnDesglose').addEventListener('click',()=>{const wrapper=document.getElementById('desgloseWrapper'),t=TEXTS[currentLang];desgloseExpanded=!desgloseExpanded;wrapper.classList.toggle('expanded',desgloseExpanded);document.getElementById('btnDesgloseText').textContent=desgloseExpanded?t.btnDesgloseHide:t.btnDesglose;});document.getElementById('notaPVToggle').addEventListener('click',()=>{document.getElementById('notaPV').classList.toggle('open');});document.getElementById('notaPVLink').addEventListener('click',()=>{alert(TEXTS[currentLang].notaPVModal);});window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();window.deferredPrompt=e;document.getElementById('installBanner').classList.add('show');});document.getElementById('installBtn').addEventListener('click',async()=>{if(window.deferredPrompt){window.deferredPrompt.prompt();const{outcome}=await window.deferredPrompt.userChoice;if(outcome==='accepted')document.getElementById('installBanner').classList.remove('show');window.deferredPrompt=null;}});if('serviceWorker'in navigator)navigator.serviceWorker.register('/sw.js');document.getElementById('regimenFiscal').addEventListener('change',function(){const w=document.getElementById('warningResico');if(this.value==='RESICO'&&selectedPlatform!=='directa'){w.style.display='block';}else{w.style.display='none';}});});
