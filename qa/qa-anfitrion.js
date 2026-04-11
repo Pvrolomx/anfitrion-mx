@@ -355,17 +355,18 @@ async function suite6_Fiscal(html) {
   result('6j', 'Fiscal', `31 estados en dropdown (${estadoCount} encontrados)`,
     estadoCount >= 28 ? 'PASS' : 'FAIL');
 
-  // Label Airbnb 15% vs rate 15.5% (bug conocido)
-  // El botón tiene platform-fee>15% pero la tasa es 0.155
-  const labelTiene15  = html.match(/platform-fee[^<]*>15%/) !== null;
-  const rateTiene155  = html.includes('0.155');
-  if (labelTiene15 && rateTiene155) {
-    result('6k', 'Fiscal', 'Label Airbnb coincide con rate (15.5%)', 'FAIL',
-      'Botón muestra "15%" pero rate=0.155 — diferencia de $75 por $15,000');
+  // Label Airbnb 15.5% — verificar el span platform-fee del botón airbnb15
+  // Y también el aria-label de accesibilidad
+  // Buscar específicamente en el contexto del botón airbnb15, no en aria-label genérico
+  const airbnb15Btn = html.match(/data-platform="airbnb15"[^>]*>[\s\S]{0,100}/)?.[0] || '';
+  const labelEsCorrecto = airbnb15Btn.includes('15.5%');
+  const rateTiene155    = html.includes('airbnb15:0.155') || html.includes('0.155');
+  result('6k', 'Fiscal', 'Label botón Airbnb 15.5% correcto',
+    labelEsCorrecto ? 'PASS' : 'FAIL',
+    labelEsCorrecto ? '' : 'platform-fee muestra "15%" pero rate real es 15.5%');
+  if (!labelEsCorrecto && rateTiene155) {
     bug('🟡', 'Label botón "Airbnb 15%" incorrecto — rate real es 15.5%',
       'En el HTML, cambiar: <span class="platform-fee">15.5%</span>');
-  } else {
-    result('6k', 'Fiscal', 'Label Airbnb 15.5% correcto', 'PASS');
   }
 
   // Warning RESICO+plataformas
