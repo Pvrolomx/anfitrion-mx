@@ -256,88 +256,77 @@
   if(typeof html2pdf==='undefined'){alert('Error: PDF no disponible. Recarga la página.');return;}
   const btn=document.getElementById('btnDescargarPDF');
   btn.disabled=true;
-  btn.innerHTML='⏳...';
+  btn.innerHTML='&#x23F3;...';
   try{
     const data=lastCalculation;
     const t=TEXTS[currentLang];
-    const plataformasLabel={airbnb:'Airbnb 3%',airbnb15:'Airbnb 15.5%',vrbo:'Vrbo 8%',booking:'Booking 15%',directa:'Directa 0%'};
-    const regimenesLabel={SIN_RFC:'Sin RFC (retención 20%)',RESICO:'RESICO (4% ISR)',ACT_EMPRESARIAL:'Plataformas Digitales (4% ISR)'};
+    const pNames={airbnb:'Airbnb 3%',airbnb15:'Airbnb 15.5%',vrbo:'Vrbo 8%',booking:'Booking 15%',directa:'Directa 0%'};
+    const rNames={SIN_RFC:'Sin RFC (retenci\xF3n 20%)',RESICO:'RESICO (4% ISR)',ACT_EMPRESARIAL:'Plataformas Digitales (4% ISR)'};
 
-    // Helper de fila — retorna string HTML
-    function row(label,value,color,bg){
-      var bg2=bg||'#ffffff';
-      var col=color||'#1e293b';
-      return '<tr style="background:'+bg2+'"><td style="padding:10px 14px;color:#475569;border:1px solid #e2e8f0;">'+label+'</td><td style="padding:10px 14px;text-align:right;font-weight:600;color:'+col+';border:1px solid #e2e8f0;">'+value+'</td></tr>';
+    function fila(label,valor,colorVal,bgRow){
+      return '<tr style="background:'+(bgRow||'#ffffff')+';"><td style="padding:9px 12px;color:#374151;border:1px solid #d1d5db;font-size:12px;">'+label+'</td>'
+            +'<td style="padding:9px 12px;text-align:right;font-weight:600;color:'+(colorVal||'#111827')+';border:1px solid #d1d5db;font-size:12px;">'+valor+'</td></tr>';
     }
 
     var rows='';
-
-    // 1. Ingreso bruto
-    rows+=row('Ingreso bruto',formatMoney(data.ingresoBruto,'MXN'),'#059669','#f0fdf4');
-
-    // 2. Comisión
-    if(data.comisionPlataforma>0)
-      rows+=row('Comisión '+(plataformasLabel[data.plataforma]||''),'-'+formatMoney(data.comisionPlataforma,'MXN'),'#dc2626','#ffffff');
-
-    // 3. ISR
-    if(data.retencionISR>0)
-      rows+=row(t.labelRetencionISR,'-'+formatMoney(data.retencionISR,'MXN'),'#dc2626','#f8fafc');
-
-    // 4. IVA
-    if(data.retencionIVA>0)
-      rows+=row(t.labelRetencionIVA,'-'+formatMoney(data.retencionIVA,'MXN'),'#dc2626','#ffffff');
-
-    // 5. IVA adicional
-    if(data.ivaAdicional>0)
-      rows+=row(t.labelIVAAdicional,'-'+formatMoney(data.ivaAdicional,'MXN'),'#dc2626','#f8fafc');
-
-    // 6. ISH
+    // Ingreso bruto — primera fila, verde suave
+    rows+=fila('<strong>Ingreso bruto</strong>','<strong>'+formatMoney(data.ingresoBruto,'MXN')+'</strong>','#065f46','#ecfdf5');
+    // Comisión
+    if(data.comisionPlataforma>0) rows+=fila('Comisi\xF3n '+(pNames[data.plataforma]||''),'-'+formatMoney(data.comisionPlataforma,'MXN'),'#b91c1c');
+    // ISR
+    if(data.retencionISR>0) rows+=fila(t.labelRetencionISR,'-'+formatMoney(data.retencionISR,'MXN'),'#b91c1c','#fafafa');
+    // IVA
+    if(data.retencionIVA>0) rows+=fila(t.labelRetencionIVA,'-'+formatMoney(data.retencionIVA,'MXN'),'#b91c1c');
+    // IVA adicional
+    if(data.ivaAdicional>0) rows+=fila(t.labelIVAAdicional,'-'+formatMoney(data.ivaAdicional,'MXN'),'#b91c1c','#fafafa');
+    // ISH
     var ishPct=ESTADOS[data.estado]?((ESTADOS[data.estado].ish*100).toFixed(1)+'%'):'';
-    var ishLabel='ISH '+data.estado+(ishPct?' ('+ishPct+')':'');
-    if(data.tieneConvenio){
-      rows+=row(ishLabel,t.airbnbPaga,'#059669','#ffffff');
-    }else if(data.ishAPagar>0){
-      rows+=row(ishLabel,'-'+formatMoney(data.ishAPagar,'MXN'),'#dc2626','#ffffff');
-    }
+    var ishLbl='ISH '+data.estado+(ishPct?' ('+ishPct+')':'');
+    if(data.tieneConvenio) rows+=fila(ishLbl,t.airbnbPaga,'#059669');
+    else if(data.ishAPagar>0) rows+=fila(ishLbl,'-'+formatMoney(data.ishAPagar,'MXN'),'#b91c1c');
+    // Limpieza
+    if(data.gastoLimpieza>0) rows+=fila(t.labelGastoLimpieza,'-'+formatMoney(data.gastoLimpieza,'MXN'),'#b91c1c','#fafafa');
+    // Consumibles
+    if(data.gastoConsumibles>0) rows+=fila(t.labelGastoConsumibles,'-'+formatMoney(data.gastoConsumibles,'MXN'),'#b91c1c');
+    // Total deducciones — separador rojo claro
+    rows+='<tr style="background:#fef2f2;"><td style="padding:9px 12px;font-weight:700;color:#7f1d1d;border:1px solid #fca5a5;font-size:12px;">Total deducciones</td>'
+         +'<td style="padding:9px 12px;text-align:right;font-weight:700;color:#b91c1c;border:1px solid #fca5a5;font-size:12px;">-'+formatMoney(data.totalDeducciones,'MXN')+'</td></tr>';
+    // Ganancia neta — fila verde final grande
+    rows+='<tr style="background:#10b981;"><td style="padding:13px 12px;font-weight:700;color:#ffffff;font-size:14px;border:2px solid #059669;">'+t.labelGananciaNeta+'</td>'
+         +'<td style="padding:13px 12px;text-align:right;font-weight:700;color:#ffffff;font-size:17px;border:2px solid #059669;">'+formatMoney(data.gananciaNeta,'MXN')+'</td></tr>';
 
-    // 7. Limpieza
-    if(data.gastoLimpieza>0)
-      rows+=row(t.labelGastoLimpieza,'-'+formatMoney(data.gastoLimpieza,'MXN'),'#dc2626','#f8fafc');
-
-    // 8. Consumibles
-    if(data.gastoConsumibles>0)
-      rows+=row(t.labelGastoConsumibles,'-'+formatMoney(data.gastoConsumibles,'MXN'),'#dc2626','#ffffff');
-
-    // 9. Total deducciones
-    rows+='<tr style="background:#fef2f2;"><td style="padding:10px 14px;font-weight:700;color:#991b1b;border:1px solid #fecaca;">Total deducciones</td><td style="padding:10px 14px;text-align:right;font-weight:700;color:#dc2626;border:1px solid #fecaca;">-'+formatMoney(data.totalDeducciones,'MXN')+'</td></tr>';
-
-    // 10. Ganancia neta — al final, destacada
-    rows+='<tr style="background:#10b981;"><td style="padding:14px;font-weight:700;color:#ffffff;font-size:15px;border:2px solid #059669;">'+t.labelGananciaNeta+'</td><td style="padding:14px;text-align:right;font-weight:700;font-size:19px;color:#ffffff;border:2px solid #059669;">'+formatMoney(data.gananciaNeta,'MXN')+'</td></tr>';
-
-    // HTML completo del PDF — fondo blanco explícito en todos los niveles
-    var pdfHtml='<!DOCTYPE html><html><head><meta charset="UTF-8"><style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,Helvetica,sans-serif;background:#ffffff;color:#1e293b;}</style></head><body style="background:#ffffff;padding:0;margin:0;">'
-      +'<div style="width:550px;margin:0 auto;padding:32px 24px;background:#ffffff;">'
-      +'<div style="text-align:center;margin-bottom:24px;padding-bottom:16px;border-bottom:3px solid #10b981;">'
-      +'<p style="font-size:30px;margin-bottom:4px;">&#x1F3E0;</p>'
-      +'<h1 style="color:#10b981;font-size:22px;font-weight:700;margin:0 0 4px 0;">Anfi&#x200B;tri&#xF3;n MX</h1>'
-      +'<p style="color:#64748b;font-size:11px;margin:0;">Calculadora Fiscal para Anfitriones</p>'
+    // HTML completo — sin width fijo ni margin:auto en el body div
+    // El ancho lo controla jsPDF (A4 = 210mm, con margin 15mm c/lado = 180mm de contenido)
+    var pdfHtml='<!DOCTYPE html>'
+      +'<html><head><meta charset="UTF-8">'
+      +'<style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,Helvetica,sans-serif;background:#ffffff;color:#111827;-webkit-print-color-adjust:exact;print-color-adjust:exact;}</style>'
+      +'</head><body>'
+      // Contenedor principal — 100% ancho, padding tipo carta estándar
+      +'<div style="padding:0;background:#ffffff;">'
+        // HEADER centrado
+        +'<div style="text-align:center;padding-bottom:14px;margin-bottom:16px;border-bottom:2px solid #10b981;">'
+          +'<p style="font-size:26px;line-height:1;margin-bottom:6px;">&#x1F3E0;</p>'
+          +'<h1 style="color:#10b981;font-size:20px;font-weight:700;margin:0 0 3px;">Anfi​trión MX</h1>'
+          +'<p style="color:#6b7280;font-size:10px;margin:0;">Calculadora Fiscal para Anfitriones</p>'
+        +'</div>'
+        // Chip de contexto
+        +'<div style="margin-bottom:14px;padding:8px 10px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:4px;font-size:10px;color:#374141;">'
+          +'<strong>Plataforma:</strong> '+(pNames[data.plataforma]||data.plataforma)
+          +'&nbsp;&nbsp;<strong>Estado:</strong> '+data.estado
+          +'&nbsp;&nbsp;<strong>R&eacute;gimen:</strong> '+(rNames[data.regimen]||data.regimen)
+        +'</div>'
+        // Tabla — 100% ancho
+        +'<table style="width:100%;border-collapse:collapse;">'+rows+'</table>'
+        // Footer
+        +'<div style="margin-top:16px;padding-top:12px;border-top:1px solid #e5e7eb;text-align:center;">'
+          +'<p style="font-size:9px;color:#9ca3af;margin:0 0 2px;">anfitrion.expatadvisormx.com</p>'
+          +'<p style="font-size:8px;color:#9ca3af;margin:0;">C&aacute;lculos aproximados. No constituyen asesor&iacute;a fiscal ni legal.</p>'
+        +'</div>'
       +'</div>'
-      +'<div style="margin-bottom:18px;padding:10px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:4px;font-size:11px;color:#475569;">'
-      +'<strong>Plataforma:</strong> '+(plataformasLabel[data.plataforma]||data.plataforma)
-      +'&nbsp;&nbsp;&nbsp;<strong>Estado:</strong> '+data.estado
-      +'&nbsp;&nbsp;&nbsp;<strong>R&eacute;gimen:</strong> '+(regimenesLabel[data.regimen]||data.regimen)
-      +'</div>'
-      +'<table style="width:100%;border-collapse:collapse;font-size:13px;background:#ffffff;">'+rows+'</table>'
-      +'<div style="margin-top:20px;padding-top:14px;border-top:1px solid #e2e8f0;text-align:center;font-size:9px;color:#94a3b8;">'
-      +'<p style="margin:0 0 3px;">anfitrion.expatadvisormx.com</p>'
-      +'<p style="margin:0;">&#x26A0;&#xFE0F; C&aacute;lculos aproximados. No constituyen asesor&iacute;a fiscal ni legal.</p>'
-      +'</div>'
-      +'</div></body></html>';
+      +'</body></html>';
 
-    // Usar .from(htmlString) — NO monta nada en el DOM
-    // html2pdf crea un iframe interno y lo renderiza limpiamente
     await html2pdf().set({
-      margin:10,
+      margin:[15,15,15,15],          // margen carta estándar: 15mm cada lado
       filename:'anfitrion-mx-reporte.pdf',
       image:{type:'jpeg',quality:0.98},
       html2canvas:{
