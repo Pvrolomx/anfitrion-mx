@@ -253,89 +253,102 @@
         function mostrarResultados(data){const t=TEXTS[currentLang];document.getElementById('results').classList.add('show');document.getElementById('gananciaNeta').textContent=formatMoney(data.gananciaNeta,'MXN');document.getElementById('gananciaNetaSecondary').textContent=formatMoney(data.gananciaNeta/tipoCambio,'USD');document.getElementById('ingresoBruto').textContent=formatMoney(data.ingresoBruto,'MXN');document.getElementById('totalDeducciones').innerHTML='<strong>-'+formatMoney(data.totalDeducciones,'MXN')+'</strong>';const pn={airbnb:'Airbnb 3%',airbnb15:'Airbnb 15%',vrbo:'Vrbo',booking:'Booking',directa:'Directa'};document.getElementById('plataformaNombre').textContent=pn[selectedPlatform];document.getElementById('comisionPlataforma').textContent='-'+formatMoney(data.comisionPlataforma,'MXN');document.getElementById('retencionISR').textContent='-'+formatMoney(data.retencionISR,'MXN');document.getElementById('retencionIVA').textContent='-'+formatMoney(data.retencionIVA,'MXN');const rowIVA=document.getElementById('rowIVAAdicional');if(data.ivaAdicional>0){rowIVA.style.display='flex';document.getElementById('ivaAdicional').textContent='-'+formatMoney(data.ivaAdicional,'MXN');}else{rowIVA.style.display='none';}document.getElementById('ishLabel').textContent='ISH '+data.estado+' ('+(ESTADOS[data.estado].ish*100).toFixed(1)+'%)';document.getElementById('ishValor').textContent=data.tieneConvenio?t.airbnbPaga:'-'+formatMoney(data.ishAPagar,'MXN');document.getElementById('ishValor').className='result-value '+(data.tieneConvenio?'positive':'negative');document.getElementById('gastoLimpiezaResult').textContent='-'+formatMoney(data.gastoLimpieza,'MXN');document.getElementById('gastoConsumiblesResult').textContent='-'+formatMoney(data.gastoConsumibles,'MXN');document.getElementById('results').scrollIntoView({behavior:'smooth',block:'start'});}
         async function generatePDF(){
   if(!lastCalculation){alert('Calcula primero');return;}
-  if(typeof html2pdf==='undefined'){alert('Error: PDF no disponible. Recarga la página.');return;}
+  if(typeof html2pdf==='undefined'){alert('Error: PDF no disponible. Recarga la p\u00E1gina.');return;}
   const btn=document.getElementById('btnDescargarPDF');
   btn.disabled=true;
-  btn.innerHTML='&#x23F3;...';
+  btn.innerHTML='\u23F3...';
   try{
     const data=lastCalculation;
     const t=TEXTS[currentLang];
     const pNames={airbnb:'Airbnb 3%',airbnb15:'Airbnb 15.5%',vrbo:'Vrbo 8%',booking:'Booking 15%',directa:'Directa 0%'};
-    const rNames={SIN_RFC:'Sin RFC (retenci\xF3n 20%)',RESICO:'RESICO (4% ISR)',ACT_EMPRESARIAL:'Plataformas Digitales (4% ISR)'};
+    const rNames={SIN_RFC:'Sin RFC (retenci\u00F3n 20%)',RESICO:'RESICO (4% ISR)',ACT_EMPRESARIAL:'Plataformas Digitales (4% ISR)'};
 
-    function fila(label,valor,colorVal,bgRow){
-      return '<tr style="background:'+(bgRow||'#ffffff')+';"><td style="padding:9px 12px;color:#374151;border:1px solid #d1d5db;font-size:12px;">'+label+'</td>'
-            +'<td style="padding:9px 12px;text-align:right;font-weight:600;color:'+(colorVal||'#111827')+';border:1px solid #d1d5db;font-size:12px;">'+valor+'</td></tr>';
-    }
+    // Paleta
+    var VERDE='#059669',ROJO='#b91c1c',GRIS='#374151',BORDE='#d1d5db';
 
-    var rows='';
-    // Ingreso bruto — primera fila, verde suave
-    rows+=fila('<strong>Ingreso bruto</strong>','<strong>'+formatMoney(data.ingresoBruto,'MXN')+'</strong>','#065f46','#ecfdf5');
-    // Comisión
-    if(data.comisionPlataforma>0) rows+=fila('Comisi\xF3n '+(pNames[data.plataforma]||''),'-'+formatMoney(data.comisionPlataforma,'MXN'),'#b91c1c');
-    // ISR
-    if(data.retencionISR>0) rows+=fila(t.labelRetencionISR,'-'+formatMoney(data.retencionISR,'MXN'),'#b91c1c','#fafafa');
-    // IVA
-    if(data.retencionIVA>0) rows+=fila(t.labelRetencionIVA,'-'+formatMoney(data.retencionIVA,'MXN'),'#b91c1c');
-    // IVA adicional
-    if(data.ivaAdicional>0) rows+=fila(t.labelIVAAdicional,'-'+formatMoney(data.ivaAdicional,'MXN'),'#b91c1c','#fafafa');
-    // ISH
+    // Filas de la tabla
+    var filas=[];
+    filas.push(['<strong>Ingreso bruto</strong>','<strong>'+formatMoney(data.ingresoBruto,'MXN')+'</strong>',VERDE,'#ecfdf5']);
+    if(data.comisionPlataforma>0) filas.push(['Comisi\u00F3n '+(pNames[data.plataforma]||''),'-'+formatMoney(data.comisionPlataforma,'MXN'),ROJO,'#fff']);
+    if(data.retencionISR>0)       filas.push([t.labelRetencionISR,'-'+formatMoney(data.retencionISR,'MXN'),ROJO,'#f9fafb']);
+    if(data.retencionIVA>0)       filas.push([t.labelRetencionIVA,'-'+formatMoney(data.retencionIVA,'MXN'),ROJO,'#fff']);
+    if(data.ivaAdicional>0)       filas.push([t.labelIVAAdicional,'-'+formatMoney(data.ivaAdicional,'MXN'),ROJO,'#f9fafb']);
     var ishPct=ESTADOS[data.estado]?((ESTADOS[data.estado].ish*100).toFixed(1)+'%'):'';
     var ishLbl='ISH '+data.estado+(ishPct?' ('+ishPct+')':'');
-    if(data.tieneConvenio) rows+=fila(ishLbl,t.airbnbPaga,'#059669');
-    else if(data.ishAPagar>0) rows+=fila(ishLbl,'-'+formatMoney(data.ishAPagar,'MXN'),'#b91c1c');
-    // Limpieza
-    if(data.gastoLimpieza>0) rows+=fila(t.labelGastoLimpieza,'-'+formatMoney(data.gastoLimpieza,'MXN'),'#b91c1c','#fafafa');
-    // Consumibles
-    if(data.gastoConsumibles>0) rows+=fila(t.labelGastoConsumibles,'-'+formatMoney(data.gastoConsumibles,'MXN'),'#b91c1c');
-    // Total deducciones — separador rojo claro
-    rows+='<tr style="background:#fef2f2;"><td style="padding:9px 12px;font-weight:700;color:#7f1d1d;border:1px solid #fca5a5;font-size:12px;">Total deducciones</td>'
-         +'<td style="padding:9px 12px;text-align:right;font-weight:700;color:#b91c1c;border:1px solid #fca5a5;font-size:12px;">-'+formatMoney(data.totalDeducciones,'MXN')+'</td></tr>';
-    // Ganancia neta — fila verde final grande
-    rows+='<tr style="background:#10b981;"><td style="padding:13px 12px;font-weight:700;color:#ffffff;font-size:14px;border:2px solid #059669;">'+t.labelGananciaNeta+'</td>'
-         +'<td style="padding:13px 12px;text-align:right;font-weight:700;color:#ffffff;font-size:17px;border:2px solid #059669;">'+formatMoney(data.gananciaNeta,'MXN')+'</td></tr>';
+    if(data.tieneConvenio)        filas.push([ishLbl,t.airbnbPaga,VERDE,'#fff']);
+    else if(data.ishAPagar>0)     filas.push([ishLbl,'-'+formatMoney(data.ishAPagar,'MXN'),ROJO,'#fff']);
+    if(data.gastoLimpieza>0)      filas.push([t.labelGastoLimpieza,'-'+formatMoney(data.gastoLimpieza,'MXN'),ROJO,'#f9fafb']);
+    if(data.gastoConsumibles>0)   filas.push([t.labelGastoConsumibles,'-'+formatMoney(data.gastoConsumibles,'MXN'),ROJO,'#fff']);
+    // Separador total
+    filas.push(['__TOTAL__','-'+formatMoney(data.totalDeducciones,'MXN'),'#7f1d1d','#fef2f2']);
+    // Ganancia neta
+    filas.push(['__NETA__',formatMoney(data.gananciaNeta,'MXN'),'#fff','#10b981']);
 
-    // HTML completo — sin width fijo ni margin:auto en el body div
-    // El ancho lo controla jsPDF (A4 = 210mm, con margin 15mm c/lado = 180mm de contenido)
-    var pdfHtml='<!DOCTYPE html>'
-      +'<html><head><meta charset="UTF-8">'
-      +'<style>*{margin:0;padding:0;box-sizing:border-box;}body{font-family:Arial,Helvetica,sans-serif;background:#ffffff;color:#111827;-webkit-print-color-adjust:exact;print-color-adjust:exact;}</style>'
-      +'</head><body>'
-      // Contenedor principal — 100% ancho, padding tipo carta estándar
-      +'<div style="padding:0;background:#ffffff;">'
-        // HEADER centrado
-        +'<div style="text-align:center;padding-bottom:14px;margin-bottom:16px;border-bottom:2px solid #10b981;">'
-          +'<p style="font-size:26px;line-height:1;margin-bottom:6px;">&#x1F3E0;</p>'
-          +'<h1 style="color:#10b981;font-size:20px;font-weight:700;margin:0 0 3px;">Anfi​trión MX</h1>'
-          +'<p style="color:#6b7280;font-size:10px;margin:0;">Calculadora Fiscal para Anfitriones</p>'
-        +'</div>'
-        // Chip de contexto
-        +'<div style="margin-bottom:14px;padding:8px 10px;background:#f9fafb;border:1px solid #e5e7eb;border-radius:4px;font-size:10px;color:#374141;">'
-          +'<strong>Plataforma:</strong> '+(pNames[data.plataforma]||data.plataforma)
-          +'&nbsp;&nbsp;<strong>Estado:</strong> '+data.estado
-          +'&nbsp;&nbsp;<strong>R&eacute;gimen:</strong> '+(rNames[data.regimen]||data.regimen)
-        +'</div>'
-        // Tabla — 100% ancho
-        +'<table style="width:100%;border-collapse:collapse;">'+rows+'</table>'
-        // Footer
-        +'<div style="margin-top:16px;padding-top:12px;border-top:1px solid #e5e7eb;text-align:center;">'
-          +'<p style="font-size:9px;color:#9ca3af;margin:0 0 2px;">anfitrion.expatadvisormx.com</p>'
-          +'<p style="font-size:8px;color:#9ca3af;margin:0;">C&aacute;lculos aproximados. No constituyen asesor&iacute;a fiscal ni legal.</p>'
-        +'</div>'
+    var trHTML='';
+    filas.forEach(function(f){
+      var label=f[0],valor=f[1],col=f[2],bg=f[3];
+      var tdStyle='padding:8px 12px;border:1px solid '+BORDE+';font-size:12px;font-family:Arial,sans-serif;';
+      var isTotal=label==='__TOTAL__';
+      var isNeta=label==='__NETA__';
+      var lblTxt=isTotal?'Total deducciones':isNeta?t.labelGananciaNeta:label;
+      var extraLbl=isNeta?'font-weight:700;font-size:13px;color:#fff;':'font-weight:'+(isTotal?'700':'400')+';color:'+GRIS+';';
+      var extraVal='font-weight:700;color:'+col+';text-align:right;'+(isNeta?'font-size:16px;':'font-size:12px;');
+      trHTML+='<tr style="background:'+bg+';">'
+             +'<td style="'+tdStyle+extraLbl+'">'+lblTxt+'</td>'
+             +'<td style="'+tdStyle+extraVal+'">'+valor+'</td>'
+             +'</tr>';
+    });
+
+    var pdfHtml='<div style="font-family:Arial,Helvetica,sans-serif;background:#fff;color:#111;width:680px;padding:0;">'
+      // Header
+      +'<div style="text-align:center;padding-bottom:12px;margin-bottom:12px;border-bottom:2px solid #10b981;">'
+        +'<div style="font-size:24px;line-height:1.2;">&#x1F3E0;</div>'
+        +'<div style="color:#10b981;font-size:20px;font-weight:700;margin:4px 0 2px;">Anfi​trión MX</div>'
+        +'<div style="color:#6b7280;font-size:10px;">Calculadora Fiscal para Anfitriones</div>'
       +'</div>'
-      +'</body></html>';
+      // Chip contexto
+      +'<div style="margin-bottom:12px;padding:7px 10px;background:#f9fafb;border:1px solid #e5e7eb;font-size:10px;color:#374151;">'
+        +'<strong>Plataforma:</strong> '+(pNames[data.plataforma]||data.plataforma)
+        +'&nbsp;&nbsp;<strong>Estado:</strong> '+data.estado
+        +'&nbsp;&nbsp;<strong>R&eacute;gimen:</strong> '+(rNames[data.regimen]||data.regimen)
+      +'</div>'
+      // Tabla completa
+      +'<table style="width:100%;border-collapse:collapse;background:#fff;">'+trHTML+'</table>'
+      // Footer
+      +'<div style="margin-top:14px;padding-top:10px;border-top:1px solid #e5e7eb;text-align:center;font-size:9px;color:#9ca3af;">'
+        +'anfitrion.expatadvisormx.com &nbsp;|&nbsp; C&aacute;lculos aproximados. No constituyen asesor&iacute;a fiscal.'
+      +'</div>'
+    +'</div>';
+
+    // Montar en wrapper visible pero tapado con overflow:hidden height:0
+    // html2canvas captura el contenido real aunque el wrapper tenga height:0
+    var wrapper=document.createElement('div');
+    wrapper.style.cssText='position:fixed;top:0;left:0;width:0;height:0;overflow:visible;z-index:-1;opacity:0.01;pointer-events:none;';
+    var inner=document.createElement('div');
+    inner.style.cssText='position:absolute;top:0;left:0;width:700px;';
+    inner.innerHTML=pdfHtml;
+    wrapper.appendChild(inner);
+    document.body.appendChild(wrapper);
+
+    // Esperar un frame para que el browser pinte el elemento
+    await new Promise(function(r){setTimeout(r,100);});
 
     await html2pdf().set({
-      margin:[15,15,15,15],          // margen carta estándar: 15mm cada lado
+      margin:[15,15,15,15],
       filename:'anfitrion-mx-reporte.pdf',
       image:{type:'jpeg',quality:0.98},
       html2canvas:{
         scale:2,
         useCORS:true,
-        logging:false
+        logging:false,
+        backgroundColor:'#ffffff',
+        width:700,
+        windowWidth:750
       },
       jsPDF:{unit:'mm',format:'a4',orientation:'portrait'}
-    }).from(pdfHtml,'string').save();
+    }).from(inner).save();
+
+    document.body.removeChild(wrapper);
 
   }catch(e){
     console.error('PDF error:',e);
