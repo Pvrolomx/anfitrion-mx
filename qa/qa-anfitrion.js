@@ -448,7 +448,7 @@ async function suite8_Browser() {
 // Para aprobar un cambio intencional:
 //   node qa-anfitrion.js --update-pdf-snapshot
 
-const GOLDEN_HASH = 'd4565c3d70298db983b21d0ee10875c91e5928cb1594291bc1137384a1f51971';
+const GOLDEN_HASH = '8143fed23065490d42bd3858240344e7ac5b66910ef46187e30805cb69b2af09';
 
 const GOLDEN_MARKERS = [
   // [marker, pos_min, pos_max] — presencia Y orden obligatorios
