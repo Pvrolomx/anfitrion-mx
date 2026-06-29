@@ -339,10 +339,10 @@ async function suite6_Fiscal(html) {
   const jalHtml = html.match(/JALISCO[^>]{0,200}/)?.[0] || '';
   const hasJalConvenio = jalHtml.includes('convenio="true"') || jalHtml.includes('convenio:true') ||
                          jalHtml.includes('data-convenio="true"');
-  const hasJalISH3     = jalHtml.includes('rate="3"') || jalHtml.includes('ish:0.03') ||
-                         jalHtml.includes('data-rate="3"');
+  const hasJalISH5     = jalHtml.includes('rate="5"') || jalHtml.includes('ish:0.05') ||
+                         jalHtml.includes('data-rate="5"');
   result('6g', 'Fiscal', 'JALISCO convenio Airbnb = true', hasJalConvenio ? 'PASS' : 'FAIL');
-  result('6h', 'Fiscal', 'JALISCO ISH = 3%',               hasJalISH3     ? 'PASS' : 'FAIL');
+  result('6h', 'Fiscal', 'JALISCO ISH = 5%',               hasJalISH5     ? 'PASS' : 'FAIL');
 
   // Nayarit sin convenio
   const nayHtml = html.match(/NAYARIT[^>]{0,150}/)?.[0] || '';
