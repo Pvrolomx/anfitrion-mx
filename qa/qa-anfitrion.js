@@ -142,8 +142,8 @@ async function suite1_HTTP() {
     html.includes('Anfitrion MX') ? 'PASS' : 'FAIL');
 
   // Footer: puede estar en <a> o texto plano
-  result('1f', 'Carga', 'Footer Colmena 2026',
-    html.includes('Colmena') && html.includes('2026') ? 'PASS' : 'FAIL');
+  result('1f', 'Carga', 'Footer Expat Advisor MX 2026',
+    html.includes('Expat Advisor MX') && html.includes('2026') ? 'PASS' : 'FAIL');
 
   // Cards (buscar por class="card" o variante)
   const cardCount = (html.match(/class="card["\s]/g) || []).length;
@@ -448,14 +448,14 @@ async function suite8_Browser() {
 // Para aprobar un cambio intencional:
 //   node qa-anfitrion.js --update-pdf-snapshot
 
-const GOLDEN_HASH = '8143fed23065490d42bd3858240344e7ac5b66910ef46187e30805cb69b2af09';
+const GOLDEN_HASH = '473316e7c72caf2246069a24688d0ac6828336e8376562d49752c362a875149b';
 
 const GOLDEN_MARKERS = [
   // [marker, pos_min, pos_max] — presencia Y orden obligatorios
   ['window.jspdf&&window.jspdf.jsPDF',    0,   300],
   ['Anfitrion MX',                       800,  1800],
   ['doc.line',                          1400,  2200],
-  ['Plataforma:',                       1600,  2600],
+  ['t.pdfChipPlataforma',               1600,  2600],
   ['function drawRow',                  2500,  3500],
   ['function drawISHConvenio',          3200,  4000],
   ['Ingreso bruto',                     3700,  4500],
@@ -467,7 +467,7 @@ const GOLDEN_MARKERS = [
   ['gastoLimpieza>0',                   4800,  5700],
   ['gastoConsumibles>0',                4900,  5800],
   ['Total deducciones',                 5000,  5900],
-  ['Tu ganancia neta',                  5400,  6300],
+  ['t.pdfGananciaNeta',                 5400,  6300],
   ['doc.save(',                         6000,  6800],
 ];
 
