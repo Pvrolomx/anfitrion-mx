@@ -448,7 +448,7 @@ async function suite8_Browser() {
 // Para aprobar un cambio intencional:
 //   node qa-anfitrion.js --update-pdf-snapshot
 
-const GOLDEN_HASH = '473316e7c72caf2246069a24688d0ac6828336e8376562d49752c362a875149b';
+const GOLDEN_HASH = '5290452ae052feabe6eb94b97c5eb8f94ec70a64ac1c1be9a2ba962f71067e0d';
 
 const GOLDEN_MARKERS = [
   // [marker, pos_min, pos_max] — presencia Y orden obligatorios
@@ -458,7 +458,7 @@ const GOLDEN_MARKERS = [
   ['t.pdfChipPlataforma',               1600,  2600],
   ['function drawRow',                  2500,  3500],
   ['function drawISHConvenio',          3200,  4000],
-  ['Ingreso bruto',                     3700,  4500],
+  ['t.labelIngresoBruto',               3700,  4500],
   ['comisionPlataforma>0',              3900,  4700],
   ['retencionISR>0',                    4000,  4900],
   ['retencionIVA>0',                    4100,  5000],
