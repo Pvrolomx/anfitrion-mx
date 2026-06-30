@@ -1,0 +1,8 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.expatadvisormx.anfitrion",
+    "sha256_cert_fingerprints": ["ED:DA:9D:9A:89:AC:19:7D:F0:02:47:48:C6:D4:D7:42:78:EC:88:92:97:21:5B:70:C7:F0:65:6F:8C:25:FD:1E"]
+  }
+}]
