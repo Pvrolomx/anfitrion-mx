@@ -13,16 +13,31 @@ ISH, comisiones). **Toda la app vive en un solo archivo:** `public/index.html`
 
 ## Pipeline de deploy y QA
 
-- **Deploy:** push a `main` → **Vercel auto-despliega**. No hay build; se sirve
+> ⚠️ **Branches (actualizado tras Protocolo Castle):** `main` es **staging**.
+> `production` es la branch que Vercel sirve en `anfitrion.expatadvisormx.com`.
+> **No hacer commits directos a `production`.** Todo cambio va a `main` primero;
+> el deploy real requiere un **merge explícito** `main` → `production`:
+> ```
+> git checkout production
+> git merge main --no-ff -m "merge: <resumen del cambio>"
+> git push origin production
+> ```
+> Antes de este protocolo, `main` auto-desplegaba directo. Ya no: un push a
+> `main` solo, aunque pase QA contra el preview, **no llega a producción**
+> hasta hacer el merge.
+
+- **Deploy:** merge a `production` → **Vercel auto-despliega**. No hay build; se sirve
   el estático tal cual.
 - **Verificación:** `cd C:\Users\pvrol\qa-runner && node qa-anfitrion.js`.
   Son **103 pruebas; la meta es 103/103 PASS**.
 - ⚠️ **El QA descarga el HTML de PRODUCCIÓN, no del working copy.** Por eso, para
-  validar un cambio hay que **commitear + pushear + esperar el deploy** primero.
+  validar un cambio hay que **mergear a `production` + pushear + esperar el deploy**
+  primero — no basta con commitear a `main`.
 - La **Suite 8 (Browser Engine)** necesita un servicio Puppeteer en `localhost:3847`:
   `cd C:\Users\pvrol\browser-duendes && node server.js` (requiere Chrome).
   Sin él solo corren ~97 pruebas. Levantarlo al inicio, detenerlo al final.
-- **Definición de "terminado":** 103/103 PASS + pusheado + deploy verificado en vivo.
+- **Definición de "terminado":** 103/103 PASS + mergeado a `production` + pusheado +
+  deploy verificado en vivo en `anfitrion.expatadvisormx.com`.
 
 ## Tripwires conocidos (si tocas X, también actualiza Y)
 
@@ -45,6 +60,12 @@ ISH, comisiones). **Toda la app vive en un solo archivo:** `public/index.html`
 - **Asserts del QA que envejecen** cuando cambia la app: ya pasó con `1f` (footer
   "Colmena" → "Expat Advisor MX") y `6h` (tasa de Jalisco). Si un cambio
   intencional rompe un assert, actualízalo para reflejar el nuevo valor correcto.
+- **Push a `main` con `target: null` en Vercel.** Si un deploy aparece `READY` pero
+  `target: null` (no `"production"`) y el cambio no se refleja en
+  `anfitrion.expatadvisormx.com`, **no es un bug de Vercel — falta el merge a
+  `production`.** Verificar con `git log --oneline -1 origin/production` vs
+  `origin/main`; si `main` está adelante, hacer el merge explícito (ver Pipeline
+  arriba). No reintentar pushes a `main` esperando que "tome" — no va a pasar.
 
 ## Convenciones
 
