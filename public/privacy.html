@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=no">
+  <title>Anfitrión MX - Privacidad / Privacy</title>
+  <meta name="robots" content="noindex">
+  <meta name="theme-color" content="#10b981">
+  <style>
+    :root {
+      --bg-secondary: #f9fafb;
+      --bg-card: #ffffff;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --text-title: #065f46;
+      --accent: #10b981;
+      --accent-dark: #059669;
+      --border: #e5e7eb;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg-secondary);
+      min-height: 100vh;
+      color: var(--text-primary);
+    }
+    .container { max-width: 480px; margin: 0 auto; padding: 16px; }
+    header {
+      display: flex; align-items: center; justify-content: center;
+      padding: 16px 0; position: relative;
+    }
+    .back-btn {
+      position: absolute; left: 0; color: var(--accent-dark);
+      text-decoration: none; font-size: 1.2rem; padding: 8px;
+    }
+    .lang-toggle {
+      position: absolute; right: 0; display: flex; gap: 2px;
+      background: var(--bg-secondary); border: 1px solid var(--border);
+      border-radius: 16px; padding: 3px;
+    }
+    .lang-btn {
+      padding: 4px 10px; border: none; border-radius: 12px;
+      font-size: 0.7rem; font-weight: 600; cursor: pointer;
+      background: transparent; color: var(--text-secondary);
+    }
+    .lang-btn.active { background: var(--accent); color: white; }
+    header h1 {
+      font-size: 1.3rem; font-weight: 700; color: var(--text-title);
+    }
+    .card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      border-radius: 16px; padding: 24px 20px; margin-bottom: 16px;
+    }
+    .card h2 {
+      font-size: 1.2rem; color: var(--text-title); margin-bottom: 16px;
+    }
+    .card h3 {
+      font-size: 1rem; color: var(--text-title); margin: 18px 0 8px;
+    }
+    .card p, .card li {
+      font-size: 0.9rem; color: var(--text-secondary);
+      line-height: 1.6; margin-bottom: 10px;
+    }
+    .card ul { padding-left: 20px; margin-bottom: 12px; }
+    .card li { margin-bottom: 6px; }
+    .highlight {
+      background: #ecfdf5;
+      border-left: 3px solid var(--accent);
+      padding: 12px 16px; border-radius: 0 12px 12px 0;
+      margin: 12px 0;
+    }
+    .highlight p { margin-bottom: 0; color: var(--text-title); }
+    .updated {
+      text-align: center; font-size: 0.78rem;
+      color: var(--text-secondary); margin-top: 8px;
+    }
+    footer {
+      text-align: center; padding: 20px 16px;
+      color: var(--text-secondary); font-size: 0.8rem;
+    }
+    footer a { color: var(--accent-dark); text-decoration: none; }
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header>
+      <a href="/" class="back-btn">←</a>
+      <h1>Anfitrión MX</h1>
+      <div class="lang-toggle">
+        <button class="lang-btn active" onclick="setLang('es')" id="btn-es">ES</button>
+        <button class="lang-btn" onclick="setLang('en')" id="btn-en">EN</button>
+      </div>
+    </header>
+
+    <!-- ESPAÑOL -->
+    <div id="privacy-es">
+      <div class="card">
+        <h2>🔒 Política de Privacidad</h2>
+
+        <div class="highlight">
+          <p><strong>En resumen:</strong> Anfitrión MX no recopila, almacena ni comparte tus datos personales. No requiere cuentas. Todos tus cálculos se guardan únicamente en tu dispositivo.</p>
+        </div>
+
+        <h3>¿Qué datos proporcionas?</h3>
+        <p>Para calcular tu ganancia neta, ingresas montos y selecciones relacionadas con tu actividad de hospedaje:</p>
+        <ul>
+          <li>Tarifa por noche y número de noches</li>
+          <li>Plataforma utilizada (Airbnb, Vrbo, Booking, directa)</li>
+          <li>Estado de la República donde se ubica tu propiedad</li>
+          <li>Régimen fiscal</li>
+          <li>Gastos de limpieza y consumibles (opcional)</li>
+        </ul>
+        <p>Ninguno de estos datos identifica a una persona. No se solicita tu nombre, correo, teléfono ni ningún dato personal.</p>
+
+        <h3>¿Dónde se guardan tus datos?</h3>
+        <p>Todos tus cálculos se almacenan <strong>exclusivamente en tu dispositivo</strong>, usando el almacenamiento local del navegador (localStorage). Anfitrión MX no tiene base de datos, no tiene cuentas de usuario y no envía tus cálculos a ningún servidor.</p>
+
+        <h3>¿Qué información sí se envía a un servidor?</h3>
+        <p>La app consulta el tipo de cambio USD/MXN en tiempo real a través de una fuente pública de datos financieros (Banxico). Esta consulta no incluye ningún dato tuyo — es una solicitud anónima de información de mercado, igual que consultar el clima.</p>
+
+        <h3>¿Se comparten datos con terceros?</h3>
+        <p>No. Anfitrión MX no comparte, vende ni transmite información a terceros, porque no recopila datos personales que compartir.</p>
+
+        <h3>¿Usa anuncios o rastreo?</h3>
+        <p>No. La app no muestra anuncios ni utiliza identificadores de publicidad, cookies de rastreo, ni analítica que identifique usuarios individuales.</p>
+
+        <h3>¿Cómo borro mis datos?</h3>
+        <p>Tus datos viven en tu dispositivo. Para borrarlos, simplemente borra los datos de navegación/almacenamiento del sitio desde la configuración de tu navegador, o desinstala la app si la instalaste como aplicación.</p>
+
+        <h3>Reportes en PDF</h3>
+        <p>Los reportes en PDF que generas se crean directamente en tu dispositivo y se descargan a tu equipo. No se almacenan ni se envían a ningún servidor.</p>
+
+        <h3>Cambios a esta política</h3>
+        <p>Si esta política cambia, la fecha de actualización se reflejará al final de esta página.</p>
+
+        <h3>Contacto</h3>
+        <p>Para preguntas sobre esta política, escribe a <a href="mailto:contacto@expatadvisormx.com">contacto@expatadvisormx.com</a>.</p>
+
+        <p class="updated">Última actualización: junio 2026</p>
+      </div>
+    </div>
+
+    <!-- ENGLISH -->
+    <div id="privacy-en" class="hidden">
+      <div class="card">
+        <h2>🔒 Privacy Policy</h2>
+
+        <div class="highlight">
+          <p><strong>In short:</strong> Anfitrión MX does not collect, store, or share your personal data. No accounts required. All your calculations are saved only on your device.</p>
+        </div>
+
+        <h3>What data do you provide?</h3>
+        <p>To calculate your net earnings, you enter amounts and selections related to your hosting activity:</p>
+        <ul>
+          <li>Nightly rate and number of nights</li>
+          <li>Platform used (Airbnb, Vrbo, Booking, direct)</li>
+          <li>The Mexican state where your property is located</li>
+          <li>Tax regime</li>
+          <li>Cleaning and supply costs (optional)</li>
+        </ul>
+        <p>None of this data identifies a person. We never ask for your name, email, phone number, or any personal information.</p>
+
+        <h3>Where is your data stored?</h3>
+        <p>All your calculations are stored <strong>exclusively on your device</strong>, using your browser's local storage. Anfitrión MX has no database, no user accounts, and never sends your calculations to any server.</p>
+
+        <h3>What information is sent to a server?</h3>
+        <p>The app fetches the live USD/MXN exchange rate from a public financial data source (Banxico). This request doesn't include any of your data — it's an anonymous request for market information, similar to checking the weather.</p>
+
+        <h3>Is data shared with third parties?</h3>
+        <p>No. Anfitrión MX does not share, sell, or transmit information to third parties, because it doesn't collect personal data to share.</p>
+
+        <h3>Does it use ads or tracking?</h3>
+        <p>No. The app shows no ads and does not use advertising identifiers, tracking cookies, or analytics that identify individual users.</p>
+
+        <h3>How do I delete my data?</h3>
+        <p>Your data lives on your device. To delete it, simply clear your browser's site data/storage settings, or uninstall the app if installed.</p>
+
+        <h3>PDF Reports</h3>
+        <p>PDF reports you generate are created directly on your device and downloaded to it. They are never stored or sent to any server.</p>
+
+        <h3>Changes to this policy</h3>
+        <p>If this policy changes, the update date below will reflect it.</p>
+
+        <h3>Contact</h3>
+        <p>For questions about this policy, write to <a href="mailto:contacto@expatadvisormx.com">contacto@expatadvisormx.com</a>.</p>
+
+        <p class="updated">Last updated: June 2026</p>
+      </div>
+    </div>
+
+    <footer>
+      <a href="/">Anfitrión MX</a> — Expat Advisor MX
+    </footer>
+  </div>
+
+  <script>
+    function setLang(lang) {
+      document.getElementById('privacy-es').classList.toggle('hidden', lang !== 'es');
+      document.getElementById('privacy-en').classList.toggle('hidden', lang !== 'en');
+      document.getElementById('btn-es').classList.toggle('active', lang === 'es');
+      document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+      document.documentElement.lang = lang;
+      localStorage.setItem('anfitrion_lang_privacy', lang);
+    }
+    var savedLang = localStorage.getItem('anfitrion_lang');
+    if (savedLang === 'en') setLang('en');
+  </script>
+</body>
+</html>
