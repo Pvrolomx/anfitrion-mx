@@ -484,7 +484,13 @@
           setTimeout(function(){if(a&&a.parentNode)a.remove();},8000);
         }
         function handleDownloadPDF(){
-          if(isTWAContext()){showPdfTwaToast();return;}
+          // Senal principal: si jsPDF no esta disponible (CDN bloqueado por el
+          // WebView del TWA, o SRI/red fallida) generatePDF() solo mostraria su
+          // alert 'PDF no disponible' y haria return (no throw). Detectamos esa
+          // condicion AQUI y mostramos el toast-enlace. isTWAContext() queda como
+          // senal secundaria. No se toca generatePDF() (GOLDEN_HASH intacto).
+          var jsPDFavail = !!(window.jspdf && window.jspdf.jsPDF);
+          if(isTWAContext() || !jsPDFavail){showPdfTwaToast();return;}
           generatePDF();
         }
     </script>
