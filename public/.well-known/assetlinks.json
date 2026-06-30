@@ -3,6 +3,9 @@
   "target": {
     "namespace": "android_app",
     "package_name": "com.expatadvisormx.anfitrion",
-    "sha256_cert_fingerprints": ["ED:DA:9D:9A:89:AC:19:7D:F0:02:47:48:C6:D4:D7:42:78:EC:88:92:97:21:5B:70:C7:F0:65:6F:8C:25:FD:1E"]
+    "sha256_cert_fingerprints": [
+      "ED:DA:9D:9A:89:AC:19:7D:F0:02:47:48:C6:D4:D7:42:78:EC:88:92:97:21:5B:70:C7:F0:65:6F:8C:25:FD:1E",
+      "8D:CD:46:C0:E9:A8:2C:B6:5B:F7:D2:87:6B:89:5A:6A:2D:55:E6:5C:60:05:D0:DC:D9:59:45:0C:50:CF:0D:0F"
+    ]
   }
 }]
